@@ -1190,17 +1190,19 @@ function Events() {
               </span>
               <span className="text-[11px] text-left font-bold">
                 {
-                  <div className="text-[#234E90] growAnimation">
+                  <div className="text-[#234E90] growAnimation flex flex-col gap-y-0.5">
                     {currentCountryExposure !== "ALL" ? (
                       focusedCountryExposures ? (
                         <>
-                          <span className="growAnimation">
-                            {exposurePercentage}
-                            {"% "}
-                          </span>
-                          <span className="growAnimation text-[#6B7A90]">
-                            of national {exposure}
-                          </span>
+                          <div>
+                            <span className="growAnimation">
+                              {exposurePercentage}
+                              {"% "}
+                            </span>
+                            <span className="growAnimation text-[#6B7A90]">
+                              of national {exposure}
+                            </span>
+                          </div>
                           <div className="bg-[#E3E9F1] growAnimation rounded-xl h-1 w-full flex item-stretch items-start">
                             <div
                               className="bg-[#234E90] rounded-xl h-full"
@@ -1214,7 +1216,7 @@ function Events() {
                         "N/A"
                       )
                     ) : (
-                      <div className="h-[17.28px]"></div>
+                      <div className="h-[22.5px]"></div>
                     )}
                   </div>
                 }
@@ -1718,27 +1720,67 @@ function Events() {
               </span>
             </p>
           </div>
-          {focusedFeatures?.length > 1 ? (
-            <div className="w-full bg-[#F4F7FB] py-3">
-              <div className="flex justify-between font-bold text-[10px] w-full py-4 px-4">
-                <span className="text-[#6B7890]">TIMELINE</span>
-                <span className="text-[#4999D0]">
-                  Full event · {focusedFeatures?.length - 1} days
-                </span>
-              </div>
-              <div className="flex flex-row h-5 justify-center items-center w-full gap-x-2 px-4">
-                {focusedSliderPlaying ? (
-                  <div
-                    className="flex items-center justify-center z-2 text-6.25 w-6.25 h-6.25 text-white bg-(--accentblue-100) rounded-4xl"
-                    onClick={() => playEvent("pause")}
-                  >
-                    <FontAwesomeIcon icon={faPause} size="2xs" color="white" />
+          <div className="w-full bg-white overflow-y-scroll">
+            {focusedFeatures?.length > 1 ? (
+              <div className="w-full bg-[#F4F7FB] py-3">
+                <div className="flex justify-between font-bold text-[10px] w-full py-4 px-4">
+                  <span className="text-[#6B7890]">TIMELINE</span>
+                  <span className="text-[#4999D0]">
+                    Full event · {focusedFeatures?.length - 1} days
+                  </span>
+                </div>
+                <div className="flex flex-row h-5 justify-center items-center w-full gap-x-2 px-4">
+                  {focusedSliderPlaying ? (
+                    <div
+                      className="flex items-center justify-center z-2 text-6.25 w-6.25 h-6.25 text-white bg-(--accentblue-100) rounded-4xl"
+                      onClick={() => playEvent("pause")}
+                    >
+                      <FontAwesomeIcon
+                        icon={faPause}
+                        size="2xs"
+                        color="white"
+                      />
+                    </div>
+                  ) : (
+                    <div
+                      className="z-2 flex items-center justify-center text-6.25 p-2 text-white bg-(--accentblue-100) rounded-full"
+                      onClick={() => playEvent("play")}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="12"
+                        height="12"
+                        viewBox="0 0 12 12"
+                        fill="none"
+                      >
+                        <path
+                          d="M10.332 5.20806C10.4734 5.28566 10.5914 5.39983 10.6735 5.53863C10.7557 5.67743 10.799 5.83576 10.799 5.99706C10.799 6.15835 10.7557 6.31668 10.6735 6.45548C10.5914 6.59429 10.4734 6.70846 10.332 6.78606L4.332 10.0861C4.1952 10.1609 4.04131 10.1989 3.8854 10.1964C3.72948 10.1939 3.5769 10.1509 3.44261 10.0716C3.30831 9.99238 3.19691 9.87961 3.11932 9.74435C3.04173 9.60909 3.00061 9.45599 3 9.30006V2.70006C3.00164 2.54463 3.04351 2.39229 3.12152 2.25785C3.19954 2.12341 3.31103 2.01147 3.44516 1.93293C3.57929 1.85439 3.73147 1.81192 3.88688 1.80967C4.0423 1.80741 4.19565 1.84544 4.332 1.92006L10.332 5.20806Z"
+                          fill="white"
+                        />
+                      </svg>
+                    </div>
+                  )}
+                  <div className="flex flex-col justify-center h-full w-full">
+                    <Slider
+                      className="mr-6 z-2 [&_[data-slot=slider-track]]:bg-(--primarygray-50) [&_[data-slot=slider-thumb]]:border-[#4999D0] [&_[data-slot=slider-thumb]]:border-2 cursor-pointer "
+                      step={1}
+                      min={0}
+                      // if there are no features, set max to 10 for demonstrative purposes
+                      max={focusedFeatures?.length - 1 || 10}
+                      value={focusedSliderValue}
+                      onValueChange={(value) => {
+                        setFocusedSliderValue(value);
+                        // apply polygon based on slider value, if features exist
+                        if (focusedFeatures) {
+                          applyPolygon(focusedFeatures[value[0]]);
+                          pauseSlider();
+                        }
+                      }}
+                    />
                   </div>
-                ) : (
-                  <div
-                    className="z-2 flex items-center justify-center text-6.25 p-2 text-white bg-(--accentblue-100) rounded-full"
-                    onClick={() => playEvent("play")}
-                  >
+                </div>
+                <div className="flex flex-row h-5 justify-center items-center w-full gap-x-2 px-4">
+                  <div className="p-2 invisible">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       width="12"
@@ -1752,255 +1794,227 @@ function Events() {
                       />
                     </svg>
                   </div>
-                )}
-                <div className="flex flex-col justify-center h-full w-full">
-                  <Slider
-                    className="mr-6 z-2 [&_[data-slot=slider-track]]:bg-(--primarygray-50) [&_[data-slot=slider-thumb]]:border-[#4999D0] [&_[data-slot=slider-thumb]]:border-2 cursor-pointer "
-                    step={1}
-                    min={0}
-                    // if there are no features, set max to 10 for demonstrative purposes
-                    max={focusedFeatures?.length - 1 || 10}
-                    value={focusedSliderValue}
-                    onValueChange={(value) => {
-                      setFocusedSliderValue(value);
-                      // apply polygon based on slider value, if features exist
-                      if (focusedFeatures) {
-                        applyPolygon(focusedFeatures[value[0]]);
-                        pauseSlider();
-                      }
-                    }}
-                  />
-                </div>
-              </div>
-              <div className="flex flex-row h-5 justify-center items-center w-full gap-x-2 px-4">
-                <div className="p-2 invisible">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="12"
-                    height="12"
-                    viewBox="0 0 12 12"
-                    fill="none"
-                  >
-                    <path
-                      d="M10.332 5.20806C10.4734 5.28566 10.5914 5.39983 10.6735 5.53863C10.7557 5.67743 10.799 5.83576 10.799 5.99706C10.799 6.15835 10.7557 6.31668 10.6735 6.45548C10.5914 6.59429 10.4734 6.70846 10.332 6.78606L4.332 10.0861C4.1952 10.1609 4.04131 10.1989 3.8854 10.1964C3.72948 10.1939 3.5769 10.1509 3.44261 10.0716C3.30831 9.99238 3.19691 9.87961 3.11932 9.74435C3.04173 9.60909 3.00061 9.45599 3 9.30006V2.70006C3.00164 2.54463 3.04351 2.39229 3.12152 2.25785C3.19954 2.12341 3.31103 2.01147 3.44516 1.93293C3.57929 1.85439 3.73147 1.81192 3.88688 1.80967C4.0423 1.80741 4.19565 1.84544 4.332 1.92006L10.332 5.20806Z"
-                      fill="white"
-                    />
-                  </svg>
-                </div>
-                <div className="relative h-6 w-full flex justify-between">
-                  {focusedFeatures?.map((feature: any, index: any) => {
-                    return (
-                      <div key={index} className="flex items-center">
-                        {index == 0 ? (
-                          <span className={`text-xs w-10 mt-3 text-[#6B7A90]`}>
-                            {new Date(focusedEvent.fromdate).toLocaleDateString(
-                              "en-US",
-                              {
-                                month: "short",
-                                day: "numeric",
-                              },
-                            )}
-                          </span>
-                        ) : index == focusedFeatures.length - 1 ? (
-                          focusedEvent.todate == Date.now() ? (
-                            "Present"
-                          ) : (
+                  <div className="relative h-6 w-full flex justify-between">
+                    {focusedFeatures?.map((feature: any, index: any) => {
+                      return (
+                        <div key={index} className="flex items-center">
+                          {index == 0 ? (
                             <span
                               className={`text-xs w-10 mt-3 text-[#6B7A90]`}
                             >
-                              {new Date(focusedEvent.todate).toLocaleDateString(
-                                "en-US",
-                                {
+                              {new Date(
+                                focusedEvent.fromdate,
+                              ).toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                              })}
+                            </span>
+                          ) : index == focusedFeatures.length - 1 ? (
+                            focusedEvent.todate == Date.now() ? (
+                              "Present"
+                            ) : (
+                              <span
+                                className={`text-xs w-10 mt-3 text-[#6B7A90]`}
+                              >
+                                {new Date(
+                                  focusedEvent.todate,
+                                ).toLocaleDateString("en-US", {
                                   month: "short",
                                   day: "numeric",
-                                },
-                              )}
+                                })}
+                              </span>
+                            )
+                          ) : index ==
+                            Math.ceil((focusedFeatures.length - 1) / 2) ? (
+                            <span
+                              className={`text-xs w-10 mt-3 text-[#6B7A90]`}
+                            >
+                              {new Date(
+                                (new Date(focusedEvent.fromdate).getTime() +
+                                  new Date(focusedEvent.todate).getTime()) /
+                                  2,
+                              ).toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                              })}
                             </span>
-                          )
-                        ) : index ==
-                          Math.ceil((focusedFeatures.length - 1) / 2) ? (
-                          <span className={`text-xs w-10 mt-3 text-[#6B7A90]`}>
-                            {new Date(
-                              (new Date(focusedEvent.fromdate).getTime() +
-                                new Date(focusedEvent.todate).getTime()) /
-                                2,
-                            ).toLocaleDateString("en-US", {
-                              month: "short",
-                              day: "numeric",
-                            })}
-                          </span>
-                        ) : (
-                          ""
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          ) : null}
-          <div className="px-5 bg-white w-full flex flex-col gap-y-2.5 overflow-y-scroll">
-            <div className="flex flex-col gap-3 bg-white w-full py-3">
-              <div className="font-bold text-[10px] text-left text-[#6B7A90]">
-                VIEW EXPOSURE BY ECONOMY
-              </div>
-              <div className="text-left flex flex-wrap text-[14px] gap-3">
-                <div
-                  className={`[text-box:trim-both_cap_alphabetic] rounded-xl h-6 whitespace-nowrap px-3  ${currentCountryExposure == "ALL" ? "bg-[#234E90] text-white" : "bg-(--accentwarmgray-20)"} font-bold flex items-center justify-center cursor-pointer`}
-                  onClick={() => setCurrentCountryExposure("ALL")}
-                >
-                  <div className="[text-box:trim-both_cap_alphabetic]">
-                    Total
-                  </div>
-                </div>
-                {focusedEvent?.affectedcountries
-                  ?.split(",")
-                  ?.map((a: string, i: number) => {
-                    if (i < 3) {
-                      return (
-                        <div
-                          className={`rounded-xl h-6 whitespace-nowrap px-3  ${currentCountryExposure == a ? "bg-(--accentblue-100) text-white" : "bg-(--accentwarmgray-20)"} font-bold flex items-center justify-center cursor-pointer`}
-                          onClick={() => {
-                            setCurrentCountryExposure(a);
-                            console.log(
-                              focusedCountryExposures.indexOf(
-                                focusedCountryExposures.find(
-                                  (c: any) => c.attributes.areaid == a,
-                                ),
-                              ),
-                            );
-                          }}
-                        >
-                          <div>{countryByIso3[a]}</div>
+                          ) : (
+                            ""
+                          )}
                         </div>
                       );
-                    }
-                  })}
-                {focusedEvent?.affectedcountries?.split(",")?.length > 3 ? (
-                  <div
-                    className={`rounded-xl overflow-hidden h-5 px-2 py-3 ${focusedEvent?.affectedcountries?.split(",")?.find((a, i) => a == currentCountryExposure && i > 2) ? "bg-(--accentblue-100) text-white" : "bg-(--accentwarmgray-20)"}  font-bold flex items-center justify-center`}
-                    onClick={() =>
-                      setOtherCountryDropdownStatus(!otherCountryDropdownStatus)
-                    }
-                  >
-                    <div className="text-nowrap max-w-40 flex justify-between cursor-pointer">
-                      {currentCountryExposure !== "ALL" &&
-                      focusedEvent?.affectedcountries
-                        ?.split(",")
-                        ?.find((a, i) => a == currentCountryExposure && i > 2)
-                        ? countryByIso3[currentCountryExposure]
-                        : "Other"}
-                    </div>
-                    <Popover
-                      open={otherCountryDropdownStatus}
-                      onOpenChange={setOtherCountryDropdownStatus}
-                    >
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          role="combobox"
-                          aria-expanded={otherCountryDropdownStatus}
-                          className="w-4 h-5.25 font-bold justify-between light border-0 shadow-none p-0 bg-transparent hover:bg-transparent cursor-pointer"
-                        >
-                          <svg
-                            className={`${otherCountryDropdownStatus ? "rotate-180" : "rotate-0"}`}
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="14"
-                            height="14"
-                            viewBox="0 0 14 14"
-                            fill="none"
-                          >
-                            <path
-                              d="M11.0949 5.35484C11.2349 5.49484 11.2349 5.70484 11.0949 5.84484L7.27289 9.68784C7.23711 9.72382 7.19458 9.75238 7.14773 9.77186C7.10087 9.79134 7.05063 9.80137 6.99989 9.80137C6.94915 9.80137 6.89891 9.79134 6.85206 9.77186C6.80521 9.75238 6.76267 9.72382 6.72689 9.68784L2.90489 5.84484C2.86478 5.81476 2.83159 5.7764 2.80759 5.73237C2.78359 5.68835 2.76933 5.63967 2.76577 5.58966C2.76222 5.53964 2.76945 5.48944 2.78699 5.44246C2.80452 5.39548 2.83195 5.35281 2.86741 5.31736C2.90286 5.2819 2.94553 5.25447 2.99251 5.23694C3.03949 5.2194 3.08968 5.21217 3.1397 5.21572C3.18972 5.21928 3.23839 5.23354 3.28242 5.25754C3.32645 5.28154 3.36481 5.31473 3.39489 5.35484L6.99989 8.95984L10.6049 5.34784C10.7449 5.20784 10.9549 5.20784 11.0949 5.34784"
-                              fill={`${focusedEvent?.affectedcountries?.split(",")?.find((a, i) => a == currentCountryExposure && i > 2) ? "white" : "black"}`}
-                            />
-                          </svg>
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-60 p-0 light rounded-none">
-                        <Command>
-                          <CommandInput
-                            placeholder="Search country..."
-                            className="h-9"
-                          />
-                          <CommandList>
-                            <CommandEmpty>Country not found.</CommandEmpty>
-                            <CommandGroup>
-                              {focusedEvent?.affectedcountries
-                                ?.split(",")
-                                ?.map((a, i) => {
-                                  if (i > 2) {
-                                    return (
-                                      <CommandItem
-                                        className="data-[selected=true]:bg-white text-left"
-                                        key="all"
-                                        value="All countries"
-                                        onSelect={() => {
-                                          setOtherCountryDropdownStatus(false);
-                                          setCurrentCountryExposure(a);
-                                        }}
-                                      >
-                                        <div className="w-90 text-wrap">
-                                          <div>{countryByIso3[a]}</div>
-                                        </div>
-                                        <Check
-                                          className={cn(
-                                            "ml-auto",
-                                            currentCountryExposure === a
-                                              ? "opacity-100"
-                                              : "opacity-0",
-                                          )}
-                                        />
-                                      </CommandItem>
-                                    );
-                                  }
-                                })}
-                            </CommandGroup>
-                          </CommandList>
-                        </Command>
-                      </PopoverContent>
-                    </Popover>
+                    })}
                   </div>
-                ) : null}
+                </div>
               </div>
-            </div>
-            {exposureSubComponent("Population")}
-            <div id="divider" className="h-px w-full bg-[#E6EBF2]"></div>
-            <div className="font-bold text-[10px] text-left text-[#6B7A90]">
-              ECONOMIC EXPOSURE
-            </div>
-            {exposureSubComponent("GDP")}
-            {sectorSubComponent("GDP")}
-            {exposureSubComponent("Urban GDP")}
-            {exposureSubComponent("Capital stock")}
-            <div id="divider" className="h-px w-full bg-[#E6EBF2]"></div>
-            <div className="font-bold text-[10px] text-left text-[#6B7A90]">
-              ASSET EXPOSURE
-            </div>
-            <div className="bg-white grid grid-cols-2 gap-2">
-              {assetsSubComponent("Buildings")}
-              {assetsSubComponent("Cropland")}
-              {assetsSubComponent("Airports")}
-              {assetsSubComponent("Ports")}
-            </div>
-            <div className="w-full flex items-center p-5 gap-2 bg-white">
-              <Link to="/datamethodology">
-                <u className="cursor-pointer font-bold text-left text-[13px] text-[#234E90] no-underline">
-                  Explore Methodology
-                </u>
-              </Link>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="14"
-                height="14"
-                viewBox="0 0 14 14"
-                fill="none"
-              >
-                <path
-                  d="M7.5879 2.19089C7.51921 2.12777 7.42826 2.09452 7.33505 2.09846C7.24185 2.1024 7.15402 2.1432 7.0909 2.21189C7.02778 2.28058 6.99453 2.37153 6.99847 2.46474C7.00241 2.55795 7.04321 2.64577 7.1119 2.70889L11.4309 6.64989H1.7499C1.65708 6.64989 1.56805 6.68677 1.50242 6.7524C1.43678 6.81804 1.3999 6.90706 1.3999 6.99989C1.3999 7.09272 1.43678 7.18174 1.50242 7.24738C1.56805 7.31302 1.65708 7.34989 1.7499 7.34989H11.4309L7.1119 11.2909C7.04321 11.354 7.00241 11.4418 6.99847 11.535C6.99453 11.6282 7.02778 11.7192 7.0909 11.7879C7.15402 11.8566 7.24185 11.8974 7.33505 11.9013C7.42826 11.9053 7.51921 11.872 7.5879 11.8089L12.4249 7.38489C12.4779 7.33575 12.5202 7.27618 12.5491 7.20993C12.578 7.14368 12.593 7.07218 12.593 6.99989C12.593 6.9276 12.578 6.8561 12.5491 6.78985C12.5202 6.7236 12.4779 6.66404 12.4249 6.61489L7.5879 2.19089Z"
-                  fill="#234E90"
-                />
-              </svg>
+            ) : null}
+            <div className="px-5 w-full flex flex-col gap-y-2.5">
+              <div className="flex flex-col gap-3 bg-white w-full py-3">
+                <div className="font-bold text-[10px] text-left text-[#6B7A90]">
+                  VIEW EXPOSURE BY ECONOMY
+                </div>
+                <div className="text-left flex flex-wrap text-[14px] gap-3">
+                  <div
+                    className={`[text-box:trim-both_cap_alphabetic] rounded-xl h-6 whitespace-nowrap px-3  ${currentCountryExposure == "ALL" ? "bg-[#234E90] text-white" : "bg-(--accentwarmgray-20)"} font-bold flex items-center justify-center cursor-pointer`}
+                    onClick={() => setCurrentCountryExposure("ALL")}
+                  >
+                    <div className="[text-box:trim-both_cap_alphabetic]">
+                      Total
+                    </div>
+                  </div>
+                  {focusedEvent?.affectedcountries
+                    ?.split(",")
+                    ?.map((a: string, i: number) => {
+                      if (i < 3) {
+                        return (
+                          <div
+                            className={`rounded-xl h-6 whitespace-nowrap px-3  ${currentCountryExposure == a ? "bg-(--accentblue-100) text-white" : "bg-(--accentwarmgray-20)"} font-bold flex items-center justify-center cursor-pointer`}
+                            onClick={() => {
+                              setCurrentCountryExposure(a);
+                              console.log(
+                                focusedCountryExposures.indexOf(
+                                  focusedCountryExposures.find(
+                                    (c: any) => c.attributes.areaid == a,
+                                  ),
+                                ),
+                              );
+                            }}
+                          >
+                            <div>{countryByIso3[a]}</div>
+                          </div>
+                        );
+                      }
+                    })}
+                  {focusedEvent?.affectedcountries?.split(",")?.length > 3 ? (
+                    <div
+                      className={`rounded-xl overflow-hidden h-5 px-2 py-3 ${focusedEvent?.affectedcountries?.split(",")?.find((a, i) => a == currentCountryExposure && i > 2) ? "bg-(--accentblue-100) text-white" : "bg-(--accentwarmgray-20)"}  font-bold flex items-center justify-center`}
+                      onClick={() =>
+                        setOtherCountryDropdownStatus(
+                          !otherCountryDropdownStatus,
+                        )
+                      }
+                    >
+                      <div className="text-nowrap max-w-40 flex justify-between cursor-pointer">
+                        {currentCountryExposure !== "ALL" &&
+                        focusedEvent?.affectedcountries
+                          ?.split(",")
+                          ?.find((a, i) => a == currentCountryExposure && i > 2)
+                          ? countryByIso3[currentCountryExposure]
+                          : "Other"}
+                      </div>
+                      <Popover
+                        open={otherCountryDropdownStatus}
+                        onOpenChange={setOtherCountryDropdownStatus}
+                      >
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={otherCountryDropdownStatus}
+                            className="w-4 h-5.25 font-bold justify-between light border-0 shadow-none p-0 bg-transparent hover:bg-transparent cursor-pointer"
+                          >
+                            <svg
+                              className={`${otherCountryDropdownStatus ? "rotate-180" : "rotate-0"}`}
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="14"
+                              height="14"
+                              viewBox="0 0 14 14"
+                              fill="none"
+                            >
+                              <path
+                                d="M11.0949 5.35484C11.2349 5.49484 11.2349 5.70484 11.0949 5.84484L7.27289 9.68784C7.23711 9.72382 7.19458 9.75238 7.14773 9.77186C7.10087 9.79134 7.05063 9.80137 6.99989 9.80137C6.94915 9.80137 6.89891 9.79134 6.85206 9.77186C6.80521 9.75238 6.76267 9.72382 6.72689 9.68784L2.90489 5.84484C2.86478 5.81476 2.83159 5.7764 2.80759 5.73237C2.78359 5.68835 2.76933 5.63967 2.76577 5.58966C2.76222 5.53964 2.76945 5.48944 2.78699 5.44246C2.80452 5.39548 2.83195 5.35281 2.86741 5.31736C2.90286 5.2819 2.94553 5.25447 2.99251 5.23694C3.03949 5.2194 3.08968 5.21217 3.1397 5.21572C3.18972 5.21928 3.23839 5.23354 3.28242 5.25754C3.32645 5.28154 3.36481 5.31473 3.39489 5.35484L6.99989 8.95984L10.6049 5.34784C10.7449 5.20784 10.9549 5.20784 11.0949 5.34784"
+                                fill={`${focusedEvent?.affectedcountries?.split(",")?.find((a, i) => a == currentCountryExposure && i > 2) ? "white" : "black"}`}
+                              />
+                            </svg>
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-60 p-0 light rounded-none">
+                          <Command>
+                            <CommandInput
+                              placeholder="Search country..."
+                              className="h-9"
+                            />
+                            <CommandList>
+                              <CommandEmpty>Country not found.</CommandEmpty>
+                              <CommandGroup>
+                                {focusedEvent?.affectedcountries
+                                  ?.split(",")
+                                  ?.map((a, i) => {
+                                    if (i > 2) {
+                                      return (
+                                        <CommandItem
+                                          className="data-[selected=true]:bg-white text-left"
+                                          key="all"
+                                          value="All countries"
+                                          onSelect={() => {
+                                            setOtherCountryDropdownStatus(
+                                              false,
+                                            );
+                                            setCurrentCountryExposure(a);
+                                          }}
+                                        >
+                                          <div className="w-90 text-wrap">
+                                            <div>{countryByIso3[a]}</div>
+                                          </div>
+                                          <Check
+                                            className={cn(
+                                              "ml-auto",
+                                              currentCountryExposure === a
+                                                ? "opacity-100"
+                                                : "opacity-0",
+                                            )}
+                                          />
+                                        </CommandItem>
+                                      );
+                                    }
+                                  })}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+              {exposureSubComponent("Population")}
+              <div id="divider" className="h-px w-full bg-[#E6EBF2]"></div>
+              <div className="font-bold text-[10px] text-left text-[#6B7A90]">
+                ECONOMIC EXPOSURE
+              </div>
+              {exposureSubComponent("GDP")}
+              {sectorSubComponent("GDP")}
+              {exposureSubComponent("Urban GDP")}
+              {exposureSubComponent("Capital stock")}
+              <div id="divider" className="h-px w-full bg-[#E6EBF2]"></div>
+              <div className="font-bold text-[10px] text-left text-[#6B7A90]">
+                ASSET EXPOSURE
+              </div>
+              <div className="bg-white grid grid-cols-2 gap-2">
+                {assetsSubComponent("Buildings")}
+                {assetsSubComponent("Cropland")}
+                {assetsSubComponent("Airports")}
+                {assetsSubComponent("Ports")}
+              </div>
+              <div className="w-full flex items-center p-5 gap-2 bg-white">
+                <Link to="/datamethodology">
+                  <u className="cursor-pointer font-bold text-left text-[13px] text-[#234E90] no-underline">
+                    Explore Methodology
+                  </u>
+                </Link>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 14 14"
+                  fill="none"
+                >
+                  <path
+                    d="M7.5879 2.19089C7.51921 2.12777 7.42826 2.09452 7.33505 2.09846C7.24185 2.1024 7.15402 2.1432 7.0909 2.21189C7.02778 2.28058 6.99453 2.37153 6.99847 2.46474C7.00241 2.55795 7.04321 2.64577 7.1119 2.70889L11.4309 6.64989H1.7499C1.65708 6.64989 1.56805 6.68677 1.50242 6.7524C1.43678 6.81804 1.3999 6.90706 1.3999 6.99989C1.3999 7.09272 1.43678 7.18174 1.50242 7.24738C1.56805 7.31302 1.65708 7.34989 1.7499 7.34989H11.4309L7.1119 11.2909C7.04321 11.354 7.00241 11.4418 6.99847 11.535C6.99453 11.6282 7.02778 11.7192 7.0909 11.7879C7.15402 11.8566 7.24185 11.8974 7.33505 11.9013C7.42826 11.9053 7.51921 11.872 7.5879 11.8089L12.4249 7.38489C12.4779 7.33575 12.5202 7.27618 12.5491 7.20993C12.578 7.14368 12.593 7.07218 12.593 6.99989C12.593 6.9276 12.578 6.8561 12.5491 6.78985C12.5202 6.7236 12.4779 6.66404 12.4249 6.61489L7.5879 2.19089Z"
+                    fill="#234E90"
+                  />
+                </svg>
+              </div>
             </div>
           </div>
         </div>
