@@ -412,7 +412,7 @@ export const Header = () => {
             className="flex cursor-pointer"
             onClick={() => setMenuOptions(!menuOptions)}
           >
-            <div className="flex h-14.75 w-35">
+            <div className="flex h-14.75 w-35 lg:w-auto">
               <div className="relative flex pl-2 items-center justify-start rounded-none h-full w-40 xl:w-16.75 bg-(--fundblue) xl:bg-(--accentdarkblue-90) text-white">
                 <img className="absolute pl-3.5" src={Hamburger}></img>
                 <div className="absolute text-[11px] top-8.5  font-bold">
@@ -424,7 +424,7 @@ export const Header = () => {
           <Link
             to="/home"
             activeOptions={{ exact: true }}
-            className="rounded-none w-30 mx-3 flex flex-row items-center justify-center font-semibold bg-(--fundblue) text-white border-none"
+            className="rounded-none w-30 lg:mx-3 flex flex-row items-center justify-center font-semibold bg-(--fundblue) text-white border-none"
           >
             <img src={Lockup}></img>
           </Link>
