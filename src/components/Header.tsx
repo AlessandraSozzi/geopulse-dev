@@ -412,7 +412,7 @@ export const Header = () => {
             className="flex cursor-pointer"
             onClick={() => setMenuOptions(!menuOptions)}
           >
-            <div className="flex h-14.75 w-full">
+            <div className="flex h-14.75 w-35">
               <div className="relative flex pl-2 items-center justify-start rounded-none h-full w-40 xl:w-16.75 bg-(--fundblue) xl:bg-(--accentdarkblue-90) text-white">
                 <img className="absolute pl-3.5" src={Hamburger}></img>
                 <div className="absolute text-[11px] top-8.5  font-bold">
