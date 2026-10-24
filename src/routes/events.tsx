@@ -1031,7 +1031,7 @@ function Events() {
       updateURL("");
     }
     setEventPopup("all events");
-    setFocusedEvent("");
+    // setFocusedEvent("");
     removeBlur();
     pauseSlider();
 
@@ -1230,7 +1230,7 @@ function Events() {
 
   const sectorSubComponent = (exposure: string) => {
     return (
-      <div className="rounded-xl bg-[#F4F7FB] flex flex-col items-start px-2 py-3">
+      <div className="rounded-xl bg-[#F4F7FB] flex flex-col items-start px-2 pt-3 mb-3.5">
         <div className="font-bold text-[10px] text-left text-[#6B7A90]">
           BY SECTOR
         </div>
@@ -1469,7 +1469,7 @@ function Events() {
           </div>
         </div>
         <div
-          className={`absolute z-2 bottom-65 md:bottom-0 rounded-lg rounded-t-xl md:transition-[right] md:duration-300 md:ease-in-out ${eventPopup == "all events" ? "md:right-0" : "md:-right-100 invisible"} md:visible max-h-full md:h-85/100 w-full md:w-[350px] flex flex-col bg-white cursor-default draggable`}
+          className={`absolute z-2 bottom-65 md:bottom-0 rounded-lg rounded-t-xl md:transition-[right] md:duration-600 md:ease-in-out ${eventPopup == "all events" ? "md:right-0" : "md:-right-100 invisible"} md:visible max-h-full md:h-85/100 w-full md:w-[350px] flex flex-col bg-white cursor-default draggable`}
           style={{
             "--drag-y": `${y}px`,
             touchAction: "none",
@@ -1634,7 +1634,7 @@ function Events() {
           </div>
         </div>
         <div
-          className={`z-2 absolute bottom-0 right-0 md:transition-all md:duration-300 md:ease-in-out ${eventPopup == "focused event" ? "md:right-0 visible" : "md:-right-100 invisible"} h-6/10 md:h-85/100 w-full md:w-[385px] shadow-lg/40 md:rounded-2xl flex flex-col items-start  cursor-default transition-all ease-in-out duration-300 overflow-y-auto`}
+          className={`z-2 absolute bottom-0 right-0 md:transition-all md:duration-600 md:ease-in-out ${eventPopup == "focused event" ? "md:right-0 visible" : "md:-right-100 invisible"} h-6/10 md:h-85/100 w-full md:w-[385px] shadow-lg/40 md:rounded-2xl flex flex-col items-start  cursor-default transition-all ease-in-out duration-300 overflow-y-auto`}
         >
           <div className="flex flex-col bg-[#242558] w-full gap-y-3 px-4 py-4 rounded-t-xl">
             <div className="flex flex-row rounded-t-lg items-center gap-2">
@@ -1868,7 +1868,7 @@ function Events() {
                       if (i < 3) {
                         return (
                           <div
-                            className={`rounded-xl h-6 whitespace-nowrap px-3  ${currentCountryExposure == a ? "bg-(--accentblue-100) text-white" : "bg-(--accentwarmgray-20)"} font-bold flex items-center justify-center cursor-pointer`}
+                            className={`rounded-xl h-6 whitespace-nowrap px-3 ${currentCountryExposure == a ? "bg-(--accentblue-100) text-white" : "bg-(--accentwarmgray-20)"} font-bold flex items-center justify-center cursor-pointer`}
                             onClick={() => {
                               setCurrentCountryExposure(a);
                               console.log(
@@ -1880,7 +1880,9 @@ function Events() {
                               );
                             }}
                           >
-                            <div>{countryByIso3[a]}</div>
+                            <div className="[text-box:trim-both_cap_alphabetic]">
+                              {countryByIso3[a]}
+                            </div>
                           </div>
                         );
                       }
@@ -1898,9 +1900,15 @@ function Events() {
                         {currentCountryExposure !== "ALL" &&
                         focusedEvent?.affectedcountries
                           ?.split(",")
-                          ?.find((a, i) => a == currentCountryExposure && i > 2)
-                          ? countryByIso3[currentCountryExposure]
-                          : "Other"}
+                          ?.find(
+                            (a, i) => a == currentCountryExposure && i > 2,
+                          ) ? (
+                          countryByIso3[currentCountryExposure]
+                        ) : (
+                          <span className="[text-box:trim-both_cap_alphabetic]">
+                            Other
+                          </span>
+                        )}
                       </div>
                       <Popover
                         open={otherCountryDropdownStatus}
