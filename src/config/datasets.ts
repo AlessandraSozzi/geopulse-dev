@@ -733,56 +733,56 @@ export const realtimeObject: Record<
   GDP: {
     // formerly GDP 3
     url: {
-      GDP: `${URL_RTBASE}/global_total_GVA_2022_constant2015USD_1km/ImageServer`,
-      Agriculture: `${URL_RTBASE}/global_agriculture_GVA_2022_constant2015USD_1km/ImageServer`,
-      Industry: `${URL_RTBASE}/global_industry_GVA_2022_constant2015USD_1km/ImageServer`,
-      Services: `${URL_RTBASE}/global_services_GVA_2022_constant2015USD_1km/ImageServer`,
+      GDP: `${URL_RTBASE}/global_total_GVA_2022_PPP_1km/ImageServer`,
+      Agriculture: `${URL_RTBASE}/global_agriculture_GVA_2022_PPP_1km/ImageServer`,
+      Industry: `${URL_RTBASE}/global_industry_GVA_2022_PPP_1km/ImageServer`,
+      Services: `${URL_RTBASE}/global_services_GVA_2022_PPP_1km/ImageServer`,
     },
     colorScheme: [
       {
         minValue: 0,
-        maxValue: 400,
+        maxValue: 1000,
         symbol: {
           type: "simple-fill",
           color: [50, 48, 50, 1.0],
         },
-        label: "< $400",
+        label: "< $1K",
       },
       {
-        minValue: 400,
-        maxValue: 1600,
+        minValue: 1000,
+        maxValue: 10000,
         symbol: {
           type: "simple-fill",
           color: [90, 55, 65, 1.0],
         },
-        label: "$1.6K",
+        label: "$10K",
       },
       {
-        minValue: 1600,
-        maxValue: 30000,
+        minValue: 10000,
+        maxValue: 60000,
         symbol: {
           type: "simple-fill",
           color: [160, 70, 100, 1.0],
         },
-        label: "$30K",
+        label: "$60K",
       },
       {
-        minValue: 30000,
-        maxValue: 12500000,
+        minValue: 60000,
+        maxValue: 6000000,
         symbol: {
           type: "simple-fill",
           color: [210, 130, 60, 1.0],
         },
-        label: "$12.5M",
+        label: "$6M",
       },
       {
-        minValue: 12500000,
-        maxValue: 96000000000,
+        minValue: 6000000,
+        maxValue: 7986024960,
         symbol: {
           type: "simple-fill",
           color: [240, 249, 33, 1.0],
         },
-        label: "> $12.5M",
+        label: "> $6M",
       },
     ],
     title: "gdp",
