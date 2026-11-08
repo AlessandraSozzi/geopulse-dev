@@ -9,21 +9,7 @@ html {
   text-align: center;
   height: 100dvh;
   background-color: #1e1e1e;
-  --unselectedview: #c7dff7;
-
-  --orange: #ff8200;
-  --primaryblue: rgb(0, 76, 151);
-  --darkblue: #1f3764;
-  --lightblue: #2c4f92;
-  --evenlighterblue: #4982f2;
-  --darkblue: rgb(30, 75, 146);
-  --gray: #dadada;
-  --accentgreen: #78be20;
-  --green: #658d1b;
-  --yellow: #f2a900;
-  --red: #da291c;
-  --purple: #8031a7;
-  --cyan: #00b0b9;
+  /* colour variables live in the palette in index.css (@theme) */
 }
 
 div span {

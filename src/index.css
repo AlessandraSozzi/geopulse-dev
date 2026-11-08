@@ -5,208 +5,45 @@
 
 @import "@arcgis/core/assets/esri/themes/light/main.css";
 
-@theme {
+/* App colour palette — the single place colours are defined.
+   `static` makes Tailwind always emit every variable here, including ones only referenced
+   inside inline styles or SVG attributes (e.g. fill="var(--orange)"). */
+@theme static {
+  /* brand */
   --fundblue: #004c97;
+  --lightblue: #cbe3fa; /* light brand blue: inactive tabs, Data Explainer, light surfaces */
 
+  /* primary */
   --primaryblue-100: #009cde;
-  --primaryblue-90: #19a6e1;
-  --primaryblue-80: #33b0e5;
-  --primaryblue-70: #4cbae8;
-  --primaryblue-60: #66c4eb;
-  --primaryblue-50: #80cdee;
-  --primaryblue-40: #99d7f2;
-  --primaryblue-30: #b2e1f5;
-  --primaryblue-20: #ccebf8;
-  --primaryblue-10: #e5f5fc;
-
-  --primarygray-100: #707372;
-  --primarygray-90: #7e8180;
-  --primarygray-80: #8d8f8e;
-  --primarygray-70: #9b9d9c;
-  --primarygray-60: #a9abaa;
+  --primaryblue: rgb(0, 76, 151); /* calendar selection */
   --primarygray-50: #b7b9b8;
   --primarygray-40: #c6c7c7;
   --primarygray-30: #d4d5d5;
-  --primarygray-20: #e2e3e3;
-  --primarygray-10: #f1f1f1;
-
-  --primaryblack-100: #231f20;
   --primaryblack-90: #393536;
-  --primaryblack-80: #4f4c4d;
-  --primaryblack-70: #656263;
-  --primaryblack-60: #7b7979;
-  --primaryblack-50: #918f8f;
-  --primaryblack-40: #a7a5a6;
-  --primaryblack-30: #bdbcbc;
-  --primaryblack-20: #d3d2d2;
-  --primaryblack-10: #e9e9e9;
-
   --primarywhite: #ffffff;
 
-  --accentlightgreen-100: #78be20;
-  --accentlightgreen-90: #85c436;
-  --accentlightgreen-80: #93cb4d;
-  --accentlightgreen-70: #a0d163;
-  --accentlightgreen-60: #aed879;
-  --accentlightgreen-50: #bbde8f;
-  --accentlightgreen-40: #c9e5a6;
-  --accentlightgreen-30: #d6ebbc;
-  --accentlightgreen-20: #e4f2d2;
-  --accentlightgreen-10: #f1f8e9;
-
-  --accentdarkgreen-100: #658d1b;
-  --accentdarkgreen-90: #749832;
-  --accentdarkgreen-80: #84a449;
-  --accentdarkgreen-70: #93af5f;
-  --accentdarkgreen-60: #a3bb76;
-  --accentdarkgreen-50: #b2c68d;
-  --accentdarkgreen-40: #c1d1a4;
-  --accentdarkgreen-30: #d1ddbb;
-  --accentdarkgreen-20: #e0e8d1;
-  --accentdarkgreen-10: #f0f4e8;
-
-  --accentyellow-100: #f2a900;
-  --accentyellow-90: #f3b219;
-  --accentyellow-80: #f5ba33;
-  --accentyellow-70: #f6c34c;
-  --accentyellow-60: #f7cb66;
-  --accentyellow-50: #f8d480;
-  --accentyellow-40: #fadd99;
-  --accentyellow-30: #fbe5b2;
-  --accentyellow-20: #fceecc;
-  --accentyellow-10: #fef6e5;
-
-  --accentorange-100: #ff8200;
-  --accentorange-90: #ff8e19;
-  --accentorange-80: #ff9b33;
-  --accentorange-70: #ffa74c;
-  --accentorange-60: #ffb466;
-  --accentorange-50: #ffc080;
-  --accentorange-40: #ffcd99;
-  --accentorange-30: #ffd9b2;
-  --accentorange-20: #ffe6cc;
-  --accentorange-10: #fff2e5;
-
-  --accentdarkorange-100: #e35205;
-  --accentdarkorange-90: #e6631e;
-  --accentdarkorange-80: #e97537;
-  --accentdarkorange-70: #eb8650;
-  --accentdarkorange-60: #ee9769;
-  --accentdarkorange-50: #f1a882;
-  --accentdarkorange-40: #f4ba9b;
-  --accentdarkorange-30: #f7cbb4;
-  --accentdarkorange-20: #f9dccd;
-  --accentdarkorange-10: #fceee6;
-
+  /* accents */
   --accentred-100: #da291c;
-  --accentred-90: #de3e33;
-  --accentred-80: #e15449;
-  --accentred-70: #e56960;
-  --accentred-60: #e97f77;
-  --accentred-50: #ec948d;
-  --accentred-40: #f0a9a4;
-  --accentred-30: #f4bfbb;
-  --accentred-20: #f8d4d2;
-  --accentred-10: #fbeae8;
-
-  --accentpurple-100: #8031a7;
-  --accentpurple-90: #8d46b0;
-  --accentpurple-80: #995ab9;
-  --accentpurple-70: #a66fc1;
-  --accentpurple-60: #b383ca;
-  --accentpurple-50: #bf98d3;
-  --accentpurple-40: #ccaddc;
-  --accentpurple-30: #d9c1e5;
-  --accentpurple-20: #e6d6ed;
-  --accentpurple-10: #f2eaf6;
-
-  --accentpurple-100: #8031a7;
-  --accentpurple-90: #8d46b0;
-  --accentpurple-80: #995ab9;
-  --accentpurple-70: #a66fc1;
-  --accentpurple-60: #b383ca;
-  --accentpurple-50: #bf98d3;
-  --accentpurple-40: #ccaddc;
-  --accentpurple-30: #d9c1e5;
-  --accentpurple-20: #e6d6ed;
-  --accentpurple-10: #f2eaf6;
-
-  --accentmagenta-100: #910048;
-  --accentmagenta-90: #9c195a;
-  --accentmagenta-80: #a7336d;
-  --accentmagenta-70: #b24c7f;
-  --accentmagenta-60: #bd6691;
-  --accentmagenta-50: #c880a3;
-  --accentmagenta-40: #d399b6;
-  --accentmagenta-30: #deb2c8;
-  --accentmagenta-20: #e9ccda;
-  --accentmagenta-10: #f4e5ed;
-
   --accentcyan-100: #00b0b9;
-  --accentcyan-90: #19b8c0;
-  --accentcyan-80: #33c0c7;
-  --accentcyan-70: #4cc8ce;
-  --accentcyan-60: #66d0d5;
-  --accentcyan-50: #80d7dc;
-  --accentcyan-40: #99dfe3;
-  --accentcyan-30: #b2e7ea;
-  --accentcyan-20: #cceff1;
-  --accentcyan-10: #e5f7f8;
-
-  --accentdesaturatedblue-100: #5e8ab4;
-  --accentdesaturatedblue-90: #6e96bb;
-  --accentdesaturatedblue-80: #7ea1c3;
-  --accentdesaturatedblue-70: #8eadca;
-  --accentdesaturatedblue-60: #9eb9d2;
-  --accentdesaturatedblue-50: #aec4d9;
-  --accentdesaturatedblue-40: #bfd0e1;
-  --accentdesaturatedblue-30: #cfdce8;
-  --accentdesaturatedblue-20: #dfe8f0;
-  --accentdesaturatedblue-10: #eff3f7;
-
   --accentblue-100: #407ec9;
-  --accentblue-90: #538bce;
-  --accentblue-80: #6698d4;
-  --accentblue-70: #79a5d9;
   --accentblue-60: #8cb2df;
-  --accentblue-50: #9fbee4;
-  --accentblue-40: #b3cbe9;
-  --accentblue-30: #c6d8ef;
-  --accentblue-20: #d9e5f4;
-  --accentblue-10: #ecf2fa;
-
   --accentdarkblue-100: #001e60;
   --accentdarkblue-90: #193470;
   --accentdarkblue-80: #334b80;
-  --accentdarkblue-70: #4c6190;
-  --accentdarkblue-60: #6678a0;
   --accentdarkblue-50: #808eaf;
-  --accentdarkblue-40: #99a5bf;
-  --accentdarkblue-30: #b2bbcf;
-  --accentdarkblue-20: #ccd2df;
-  --accentdarkblue-10: #e5e8ef;
-
-  --accentwarmgray-100: #6e6259;
-  --accentwarmgray-90: #7c726a;
-  --accentwarmgray-80: #8b817a;
-  --accentwarmgray-70: #99918b;
-  --accentwarmgray-60: #a8a19b;
-  --accentwarmgray-50: #b6b0ac;
-  --accentwarmgray-40: #c5c0bd;
-  --accentwarmgray-30: #d3d0cd;
   --accentwarmgray-20: #e2e0de;
-  --accentwarmgray-10: #f0efee;
-
-  --accentcoolgray-100: #b1b3b3;
-  --accentcoolgray-90: #b9bbbb;
-  --accentcoolgray-80: #c1c2c2;
-  --accentcoolgray-70: #c8caca;
   --accentcoolgray-60: #d0d1d1;
   --accentcoolgray-50: #d8d9d9;
-  --accentcoolgray-40: #e0e1e1;
-  --accentcoolgray-30: #e8e8e8;
-  --accentcoolgray-20: #eff0f0;
-  --accentcoolgray-10: #f7f7f7;
+  --accentgreen: #78be20; /* calendar */
+  --gray: #dadada; /* slider track */
+
+  /* event types (markers, filters, badges) and UI highlight */
+  --orange: #ff8200;
+  --green: #658d1b;
+  --yellow: #f2a900;
+  --red: #da291c;
+  --purple: #8031a7;
+  --cyan: #00b0b9;
 }
 
 @theme inline {
