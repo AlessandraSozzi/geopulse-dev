@@ -15,7 +15,6 @@
 
   /* primary */
   --primaryblue-100: #009cde;
-  --primaryblue: rgb(0, 76, 151); /* calendar selection */
   --primarygray-50: #b7b9b8;
   --primarygray-40: #c6c7c7;
   --primarygray-30: #d4d5d5;
@@ -23,8 +22,6 @@
   --primarywhite: #ffffff;
 
   /* accents */
-  --accentred-100: #da291c;
-  --accentcyan-100: #00b0b9;
   --accentblue-100: #407ec9;
   --accentblue-60: #8cb2df;
   --accentdarkblue-100: #001e60;
