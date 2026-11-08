@@ -67,7 +67,7 @@ export const Header = () => {
   const location = useRouterState({ select: (s) => s.location });
 
   // On white pages the tab shadows smudge into the 4px gaps, so use a thin outline there instead
-  const lightPage = ["/team", "/about"].includes(location.pathname);
+  const lightPage = ["/team", "/about", "/datamethodology"].includes(location.pathname);
   const tabShadow = "shadow-[2px_2px_8px_0_rgba(0,0,0,0.25)]";
   const tabOutline = "border border-[#C9D6EA]";
   const tabEdge = lightPage ? tabOutline : tabShadow;
