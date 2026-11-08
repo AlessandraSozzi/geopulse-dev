@@ -137,11 +137,18 @@ export const Header = () => {
     });
   };
 
-  const date = new Date();
   const allData = new Date("2019-01-07");
-  const threeMonthsAgo = new Date(date.setMonth(date.getMonth() - 3));
-  const sixMonthsAgo = new Date(date.setMonth(date.getMonth() - 6));
-  const twelveMonthsAgo = new Date(date.setMonth(date.getMonth() - 12));
+  const now = new Date();
+  const startOfTomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  // fresh date per preset (reusing one Date object made 6 months = 9 and 1 year = 21 months)
+  const monthsAgo = (months: number) => {
+    const d = new Date();
+    d.setMonth(d.getMonth() - months);
+    return d;
+  };
+  const threeMonthsAgo = monthsAgo(3);
+  const sixMonthsAgo = monthsAgo(6);
+  const twelveMonthsAgo = monthsAgo(12);
 
   const datePresets = (value: string) => {
     switch (value) {
@@ -221,25 +228,25 @@ export const Header = () => {
           <PopoverContent className="w-auto max-h-133.75 overflow-scroll p-0 my-2.5 rounded-none flex flex-col items-center">
             <div className="w-9/10 flex flex-wrap py-5 justify-start md:justify-center gap-2">
               <Button
-                className={`font-bold ${currentDatePreset == "All Data" ? "bg-(--accentblue-100)" : "bg-(--primarygray-40) text-black hover:text-white"} cursor-pointer`}
+                className={`font-bold ${currentDatePreset == "All Data" ? "bg-(--fundblue) text-white hover:bg-(--fundblue)/90" : "bg-(--lightgray) text-black hover:bg-(--lightgray) hover:brightness-95"} cursor-pointer`}
                 onClick={() => datePresets("All Data")}
               >
                 All Data
               </Button>
               <Button
-                className={`font-bold ${currentDatePreset == "Last 3 months" ? "bg-(--accentblue-100)" : "bg-(--primarygray-40) text-black hover:text-white"} cursor-pointer`}
+                className={`font-bold ${currentDatePreset == "Last 3 months" ? "bg-(--fundblue) text-white hover:bg-(--fundblue)/90" : "bg-(--lightgray) text-black hover:bg-(--lightgray) hover:brightness-95"} cursor-pointer`}
                 onClick={() => datePresets("Last 3 months")}
               >
                 Last 3 months
               </Button>
               <Button
-                className={`font-bold ${currentDatePreset == "Last 6 months" ? "bg-(--accentblue-100)" : "bg-(--primarygray-40) text-black hover:text-white"} cursor-pointer`}
+                className={`font-bold ${currentDatePreset == "Last 6 months" ? "bg-(--fundblue) text-white hover:bg-(--fundblue)/90" : "bg-(--lightgray) text-black hover:bg-(--lightgray) hover:brightness-95"} cursor-pointer`}
                 onClick={() => datePresets("Last 6 months")}
               >
                 Last 6 months
               </Button>
               <Button
-                className={`font-bold ${currentDatePreset == "Last Year" ? "bg-(--accentblue-100)" : "bg-(--primarygray-40) text-black hover:text-white"} cursor-pointer`}
+                className={`font-bold ${currentDatePreset == "Last Year" ? "bg-(--fundblue) text-white hover:bg-(--fundblue)/90" : "bg-(--lightgray) text-black hover:bg-(--lightgray) hover:brightness-95"} cursor-pointer`}
                 onClick={() => datePresets("Last Year")}
               >
                 Last Year
@@ -247,7 +254,11 @@ export const Header = () => {
             </div>
             <Calendar
               mode="range"
-              defaultMonth={state?.dateRange.from}
+              // open on the end of the period: its month on the right, the month before on the left
+              defaultMonth={(() => {
+                const end = temporaryDate.to ?? state?.dateRange.to ?? new Date();
+                return new Date(end.getFullYear(), end.getMonth() - 1, 1);
+              })()}
               selected={
                 temporaryDate.from &&
                 !temporaryDate.to &&
@@ -262,17 +273,21 @@ export const Header = () => {
                 setCurrentDatePreset("none");
               }}
               onDayMouseEnter={(day) => {
-                if (temporaryDate.from && !temporaryDate.to) setHoverDate(day);
+                // no range preview into the future
+                if (temporaryDate.from && !temporaryDate.to && day < startOfTomorrow)
+                  setHoverDate(day);
               }}
               onDayMouseLeave={() => setHoverDate(undefined)}
               numberOfMonths={2}
-              disabled={(date) => date < new Date("2019-01-01")}
+              // no future dates: days after today are disabled and you can't page past this month
+              disabled={(date) => date < new Date("2019-01-01") || date >= startOfTomorrow}
               startMonth={new Date("2019-01-07")}
+              endMonth={new Date()}
               captionLayout="dropdown"
             />
             <div className="w-4/10 flex py-5 justify-around gap-2">
               <Button
-                className={`w-5/10 font-bold bg-(--accentblue-100) cursor-pointer`}
+                className={`w-5/10 font-bold bg-(--fundblue) text-white hover:bg-(--fundblue)/90 cursor-pointer`}
                 onClick={() => {
                   actions?.setDateRange(temporaryDate);
                   setCalendarOpened(false);
@@ -281,7 +296,7 @@ export const Header = () => {
                 Apply
               </Button>
               <Button
-                className={`w-5/10 font-bold bg-white text-(--accentblue-100) hover:text-white hover:border-0 border-2 border-(--accentblue-100) cursor-pointer`}
+                className={`w-5/10 font-bold bg-white text-(--fundblue) border-2 border-(--fundblue) hover:bg-(--fundblue) hover:text-white cursor-pointer`}
                 onClick={() => {
                   setCalendarOpened(false);
                 }}
