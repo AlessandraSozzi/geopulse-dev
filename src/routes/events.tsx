@@ -276,7 +276,9 @@ function Events() {
   useEffect(() => {
     if (ref.current) {
       // shared basemap (world map + country boundaries); kept in refs because
-      // the base layer is blurred/greyed when an event is focused
+      // the base layer is blurred/greyed when an event is focused.
+      // Hillshade disabled (see basemap.ts). If re-enabled: blur it with the base layer and
+      // change the exposure layer's reorder(…, 1) so it stays above the hillshade.
       const { base, boundaries } = createBasemapLayers();
       baseLayer.current = base;
       boundariesLayer.current = boundaries;
@@ -302,6 +304,7 @@ function Events() {
       map.current = new Map({
         layers: [
           baseLayer.current,
+          // hillshade, (disabled)
           boundariesLayer.current,
           groupLayer.current,
         ],

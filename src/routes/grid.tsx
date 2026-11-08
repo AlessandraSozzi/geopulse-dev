@@ -39,9 +39,9 @@ function GridView() {
   useEffect(() => {
     if (ref.current) {
       // shared basemap, same as the real-time view
-      const { base, boundaries } = createBasemapLayers();
+      const { base, boundaries } = createBasemapLayers(); // hillshade disabled, see basemap.ts
       map.current = new Map({
-        layers: [base, boundaries],
+        layers: [base, /* hillshade, */ boundaries],
       });
 
       view.current = new MapView({
