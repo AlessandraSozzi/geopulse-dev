@@ -341,7 +341,8 @@ function GridView() {
                 <div key={field} className={cn("relative size-9", active && "z-10")}>
                   <div
                     className={cn(
-                      "size-full cursor-pointer transition-all duration-150",
+                      // soft inner outline so dark cells (e.g. low/low) stay visible on the dark panel
+                      "size-full cursor-pointer transition-all duration-150 inset-ring-1 inset-ring-white/15",
                       active && "scale-115 shadow-[0_4px_12px_rgba(0,0,0,0.5)]",
                       isolatedField != null && isolatedField !== field && "opacity-30",
                     )}
