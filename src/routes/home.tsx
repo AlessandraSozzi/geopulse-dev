@@ -118,7 +118,7 @@ const cardDetails: {
     title: "Event Tracking",
     link: "/events",
     misc: (
-      <span className="flex items-center gap-2 text-(--accentred-100)">
+      <span className="flex items-center gap-2 text-(--red)">
         {/* pulsing live dot — dot size is w-[7px]/h-[7px], halo follows it via inset-0 */}
         <span className="relative flex w-[7px] h-[7px]">
           <span className="absolute inset-0 rounded-full bg-current opacity-70 motion-safe:animate-ping" />
