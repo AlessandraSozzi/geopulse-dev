@@ -1,7 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useContext, useEffect } from "react";
+import { ArrowRight } from "lucide-react";
 import { AppActionsContext } from "@/app";
-import { CompareIcon, GridIcon } from "@/assets/NavIcons";
+import { CompareIcon, EventTrackingIcon, GridIcon } from "@/assets/NavIcons";
 import { ContentPage, Section, contentCard } from "@/components/ContentPage";
 
 export const Route = createFileRoute("/about")({
@@ -10,19 +11,61 @@ export const Route = createFileRoute("/about")({
 
 const body = "text-[16px] leading-relaxed text-[#3D4A5C]";
 
-// the two forward-looking views, shown as cards (same icons as the header tabs)
-const views = [
+type View = {
+  name: string;
+  to: "/events" | "/compare" | "/grid";
+  Icon: typeof GridIcon;
+  text: string;
+};
+
+const realtimeViews: View[] = [
   {
-    name: "Grid",
-    Icon: GridIcon,
-    text: "Investigate hazard–exposure indicators on 2D and 3D interactive maps, with color‑coded intensities and legends to support local decision‑making.",
+    name: "Event Tracking",
+    to: "/events",
+    Icon: EventTrackingIcon,
+    text: "Monitor looming and ongoing natural disasters on an interactive global map, and see their impacts on population, buildings, capital stock, GDP, agriculture and critical infrastructure.",
   },
+];
+
+// same order and icons as the header's Forward looking tab
+const forwardViews: View[] = [
   {
     name: "Compare",
+    to: "/compare",
     Icon: CompareIcon,
     text: "Benchmark exposure and risk across countries or subnational regions using harmonized indicators, aiding resource allocation and international cooperation.",
   },
+  {
+    name: "Grid",
+    to: "/grid",
+    Icon: GridIcon,
+    text: "Investigate hazard–exposure indicators on 2D and 3D interactive maps, with color‑coded intensities and legends to support local decision‑making.",
+  },
 ];
+
+// clickable card linking to one of the app's views; lifts with a shadow on hover/focus
+function ViewCard({ name, to, Icon, text }: View) {
+  return (
+    <Link
+      to={to}
+      className={`${contentCard} group flex gap-4 p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-[#234E90]/40 hover:shadow-[0_8px_24px_rgba(16,24,40,0.12)] focus-visible:-translate-y-0.5 focus-visible:shadow-[0_8px_24px_rgba(16,24,40,0.12)] focus-visible:outline-2 focus-visible:outline-[#234E90]`}
+    >
+      <div className="flex size-12 shrink-0 items-center justify-center rounded-md bg-[#E8EFFA]">
+        <Icon color="#234E90" size={22} />
+      </div>
+      <div>
+        <p className="flex items-center gap-1.5 text-[16px] font-bold group-hover:text-[#234E90]">
+          {name}
+          <ArrowRight
+            className="size-4 -translate-x-1 opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100"
+            strokeWidth={2}
+          />
+        </p>
+        <p className="mt-1 text-[14px] leading-relaxed text-[#3D4A5C]">{text}</p>
+      </div>
+    </Link>
+  );
+}
 
 function About() {
   const actions = useContext(AppActionsContext);
@@ -88,6 +131,12 @@ function About() {
             affected economies, and disaster footprints.
           </p>
         </div>
+        <p className="mt-6 text-[14px] font-bold">Explore the real-time view:</p>
+        <div className="mt-3 grid grid-cols-1 gap-5 md:grid-cols-2">
+          {realtimeViews.map((v) => (
+            <ViewCard key={v.name} {...v} />
+          ))}
+        </div>
       </Section>
 
       <Section title="Forward-Looking Analysis">
@@ -103,18 +152,8 @@ function About() {
           Explore the two forward-looking views:
         </p>
         <div className="mt-3 grid grid-cols-1 gap-5 md:grid-cols-2">
-          {views.map(({ name, Icon, text }) => (
-            <div key={name} className={`${contentCard} flex gap-4 p-5`}>
-              <div className="flex size-12 shrink-0 items-center justify-center rounded-md bg-[#E8EFFA]">
-                <Icon color="#234E90" size={22} />
-              </div>
-              <div>
-                <p className="text-[16px] font-bold">{name}</p>
-                <p className="mt-1 text-[14px] leading-relaxed text-[#3D4A5C]">
-                  {text}
-                </p>
-              </div>
-            </div>
+          {forwardViews.map((v) => (
+            <ViewCard key={v.name} {...v} />
           ))}
         </div>
       </Section>
