@@ -1434,7 +1434,7 @@ function Events() {
                   <div
                     key={`exposure_category_${f}`}
                     id={`exposure_category_${f}`}
-                    className={`exposure_ h-9 bg-black border-2 rounded-2xl px-5 opacity-0 cursor-pointer ${popInState == key ? "pop-in" : popInState == "initial" ? "pop-default" : "pop-out"} ${realtimeExposure.filter == f ? "border-(--accentcyan-100)" : "border-(--accentdarkblue-50)"}`}
+                    className={`exposure_ h-9 bg-black border-2 rounded-2xl px-5 opacity-0 cursor-pointer ${popInState == key ? "pop-in" : popInState == "initial" ? "pop-default" : "pop-out"} ${realtimeExposure.filter == f ? "border-(--cyan)" : "border-(--accentdarkblue-50)"}`}
                     style={
                       popInState == "initial"
                         ? { animationDelay: index * 0 + "ms" }
@@ -1483,7 +1483,7 @@ function Events() {
                     ([key, layer], index: number) => (
                       <div
                         key={key}
-                        className={`w-25 h-25 bg-black border-2 rounded-2xl cursor-pointer ${realtimeExposure.exposure == key ? "border-(--accentcyan-100)" : "border-(--accentdarkblue-50)"}`}
+                        className={`w-25 h-25 bg-black border-2 rounded-2xl cursor-pointer ${realtimeExposure.exposure == key ? "border-(--cyan)" : "border-(--accentdarkblue-50)"}`}
                         onClick={() => {
                           setRealtimeExposure({ exposure: key, filter: key });
                           setLayerSettingsPopup(false);
@@ -1591,7 +1591,7 @@ function Events() {
                       {event.attributes.country.toUpperCase()}
                     </div>
                     {event.attributes.iscurrent == 1 ? (
-                      <div className="flex justify-center items-center text-(--accentred-100) gap-1.5 font-bold px-[5px] text-[11px]">
+                      <div className="flex justify-center items-center text-(--red) gap-1.5 font-bold px-[5px] text-[11px]">
                         <span className="relative flex w-[7px] h-[7px] items-center">
                           <span className="absolute inset-0 rounded-full bg-current opacity-70  transition-all duration-12500 motion-safe:animate-ping" />
                           <span className="relative inline-flex w-[7px] h-[7px] rounded-full bg-current" />
@@ -1674,7 +1674,7 @@ function Events() {
             <div className="flex flex-row rounded-t-lg items-center gap-2">
               <div className="w-9/10 flex flex-row gap-2">
                 {focusedEvent.iscurrent == 1 ? (
-                  <div className="flex px-3 h-6.25 justify-center items-center bg-(--accentred-100) rounded-xl shadow-lg/10 font-bold text-white text-[11px]">
+                  <div className="flex px-3 h-6.25 justify-center items-center bg-(--red) rounded-xl shadow-lg/10 font-bold text-white text-[11px]">
                     <span className="[text-box:trim-both_cap_alphabetic]">
                       ONGOING
                     </span>
