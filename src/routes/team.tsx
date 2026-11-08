@@ -1,9 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useContext, useEffect, type ReactNode } from "react";
+import { useContext, useEffect } from "react";
 import { Building2, Mail, User } from "lucide-react";
 
 import { AppActionsContext } from "@/app";
-import { TopoBackground } from "@/components/TopoBackground";
+import {
+  ContentPage,
+  Section,
+  contentCard as card,
+} from "@/components/ContentPage";
 
 export const Route = createFileRoute("/team")({
   component: Team,
@@ -35,27 +39,6 @@ const institutions = Array.from({ length: 5 }, () => ({
 // TODO: placeholder address, confirm before launch
 const CONTACT_EMAIL = "IMF-GeoPulse@imf.org";
 
-const card =
-  "rounded-lg border border-[#E3E9F1] bg-white shadow-[0_1px_3px_rgba(16,24,40,0.06)]";
-
-function Section({
-  title,
-  description,
-  children,
-}: {
-  title: string;
-  description: string;
-  children: ReactNode;
-}) {
-  return (
-    <section className="mt-16">
-      <h2 className="text-[28px] font-bold leading-tight">{title}</h2>
-      <p className="mt-2 text-[14px] text-[#3D4A5C]">{description}</p>
-      <div className="mt-6">{children}</div>
-    </section>
-  );
-}
-
 // compact card used by Advisory board and Collaborators
 function PersonRow({ name, institution }: { name: string; institution: string }) {
   return (
@@ -78,15 +61,7 @@ function Team() {
   }, []);
 
   return (
-    // outer div scrolls; inner div grows with the content so the topo background covers the full page
-    <div className="h-full overflow-auto">
-      <div className="relative isolate min-h-full bg-white">
-        <TopoBackground />
-        <main className="mx-auto w-9/10 max-w-300 pt-24 pb-24 text-left text-[#0F1A3A]">
-          <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#234E90]">
-            About GeoPulse
-          </p>
-          <h1 className="mt-2 text-5xl font-extrabold tracking-tight">Our team</h1>
+    <ContentPage eyebrow="About GeoPulse" title="Our team">
           <p className="mt-5 max-w-160 text-[16px] leading-relaxed text-[#3D4A5C]">
             GeoPulse is built by a team of economists, data scientists and
             designers, guided by an advisory board and supported by
@@ -174,8 +149,6 @@ function Team() {
               ))}
             </div>
           </Section>
-        </main>
-      </div>
-    </div>
+    </ContentPage>
   );
 }
