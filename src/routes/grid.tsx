@@ -310,7 +310,7 @@ function GridView() {
       {legend && (
       <div className="absolute bottom-2 left-2 w-66 rounded-lg border border-[#2A3B5F] bg-[#1B1B1D] p-3.5 text-left text-white shadow-lg">
         <h3 className="text-[12px] font-bold uppercase leading-tight tracking-wide">{legend.title}</h3>
-        <p className="mt-0.5 text-[11px] text-[#8E8E93]">{legend.subtitle}</p>
+        <p className="mt-0.5 text-[11px] text-white">{legend.subtitle}</p>
 
         <div id="newLegend" className="mt-3 grid grid-cols-[auto_auto_auto] justify-start gap-x-2">
           {/* y axis: label + arrow */}

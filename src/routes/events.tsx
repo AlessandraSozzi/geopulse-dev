@@ -2169,7 +2169,7 @@ function Events() {
                   {exposure.title}
                 </h3>
                 {exposure.unit && (
-                  <p className="mt-0.5 text-[11px] text-[#8E8E93]">
+                  <p className="mt-0.5 text-[11px] text-white">
                     {exposure.unit}
                   </p>
                 )}
