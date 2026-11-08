@@ -46,11 +46,34 @@ import { isoCountries, countryByIso3 } from "@/config/isoCountries";
 
 import Hamburger from "../assets/Group 51.png";
 import Lockup from "../assets/geopulse-logo.svg";
-import DropdownArrow from "../assets/Dropdown-arrow.svg";
 
 import { mapButton } from "../routes/home";
 import { GlobeIcon } from "../assets/GlobeIcon";
 import { ArrowRight } from "../assets/arrow-right";
+
+// circled down-arrow used by every header dropdown; flips to point up while open
+const CircleChevron = ({ open }: { open: boolean }) => (
+  <svg
+    width="17"
+    height="17"
+    viewBox="0 0 17 17"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    // explicit size-* so shadcn Button's [&_svg:not([class*='size-'])]:size-4 doesn't shrink it
+    className="size-[17px] shrink-0"
+  >
+    <g transform={`rotate(${open ? "180" : "0"}, 8.5, 8.5)`}>
+      <path
+        d="M16.5 8.5C16.5 12.9183 12.9183 16.5 8.5 16.5C4.08172 16.5 0.5 12.9183 0.5 8.5C0.5 4.08172 4.08172 0.5 8.5 0.5C12.9183 0.5 16.5 4.08172 16.5 8.5Z"
+        stroke="black"
+      />
+      <path
+        d="M12.4609 7.58594L8.89844 10.9375C8.78125 11.0547 8.64063 11.125 8.5 11.125C8.38281 11.125 8.24219 11.0547 8.125 10.9609L4.5625 7.60937C4.32813 7.39844 4.32813 7.04687 4.53906 6.8125C4.75 6.57812 5.10156 6.57812 5.33594 6.78906L8.52344 9.78906L11.6875 6.78906C11.9219 6.57812 12.2734 6.57812 12.4844 6.8125C12.6953 7.02344 12.6953 7.375 12.4609 7.58594Z"
+        fill="black"
+      />
+    </g>
+  </svg>
+);
 
 export const Header = () => {
   const location = useRouterState({ select: (s) => s.location });
@@ -197,10 +220,7 @@ export const Header = () => {
                     )}
                   </section>
                 </div>
-                <img
-                  src={DropdownArrow}
-                  className={`${calendarOpened ? "rotate-180" : "rotate-0"}`}
-                ></img>
+                <CircleChevron open={calendarOpened} />
               </div>
             </div>
           </PopoverTrigger>
@@ -520,10 +540,7 @@ export const Header = () => {
                       <div className="text-[14px] font-bold text-end flex items-center pl-2">
                         {eventTypes[state?.eventFilter].type}
                       </div>
-                      <img
-                        src={DropdownArrow}
-                        className={`${eventFilterOpened ? "rotate-180" : "rotate-0"}`}
-                      ></img>
+                      <CircleChevron open={eventFilterOpened} />
                     </div>
                   </PopoverTrigger>
                   <PopoverContent className="w-56.25 p-0 py-2 my-1.25 rounded-none shadow-[0_-10px_10px_-5px_rgba(0,0,0,0.1)]">
@@ -594,10 +611,7 @@ export const Header = () => {
                           ? "All countries"
                           : countryByIso3[iso3]}
                       </div>
-                      <img
-                        src={DropdownArrow}
-                        className={`${open ? "rotate-180" : "rotate-0"}`}
-                      ></img>
+                      <CircleChevron open={open} />
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-60 p-0 mt-4 light rounded-none">
@@ -792,21 +806,7 @@ export const Header = () => {
                             </div>
                           </div>
                         </div>
-                        <svg
-                          width="12"
-                          height="12"
-                          viewBox="0 0 8 5"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <g
-                            transform={`rotate(${riskOpened ? "180" : "0"}, 3.9375, 2.1753)`}
-                          >
-                            <path
-                              d="M3.64746 4.23193L0.131836 0.716309C-0.0439453 0.558105 -0.0439453 0.294434 0.131836 0.118652C0.290039 -0.0395508 0.553711 -0.0395508 0.729492 0.118652L3.94629 3.33545L7.16309 0.118652C7.32129 -0.0395508 7.58496 -0.0395508 7.74316 0.118652C7.91895 0.276855 7.91895 0.558105 7.74316 0.716309L4.22754 4.23193C4.06934 4.39014 3.80566 4.39014 3.64746 4.23193Z"
-                              fill="black"
-                            />
-                          </g>
-                        </svg>
+                        <CircleChevron open={riskOpened} />
                       </div>
                     </PopoverTrigger>
                     <PopoverContent className="w-75 p-0 py-5 my-1.25 rounded-none shadow-[0_-10px_10px_-5px_rgba(0,0,0,0.1)]">
@@ -927,26 +927,7 @@ export const Header = () => {
                             {scenarioMapper[state?.currentScenario]}
                           </div>
                         </div>
-                        <svg
-                          width="17"
-                          height="18"
-                          viewBox="0 0 17 18"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <g
-                            transform={`rotate(${scenarioOpened ? "180" : "0"}, 8.5, 8.5)`}
-                          >
-                            <path
-                              d="M16.5 8.5C16.5 12.9183 12.9183 16.5 8.5 16.5C4.08172 16.5 0.5 12.9183 0.5 8.5C0.5 4.08172 4.08172 0.5 8.5 0.5C12.9183 0.5 16.5 4.08172 16.5 8.5Z"
-                              stroke="black"
-                            />
-                            <path
-                              d="M12.4609 7.58594L8.89844 10.9375C8.78125 11.0547 8.64063 11.125 8.5 11.125C8.38281 11.125 8.24219 11.0547 8.125 10.9609L4.5625 7.60937C4.32813 7.39844 4.32813 7.04687 4.53906 6.8125C4.75 6.57812 5.10156 6.57812 5.33594 6.78906L8.52344 9.78906L11.6875 6.78906C11.9219 6.57812 12.2734 6.57812 12.4844 6.8125C12.6953 7.02344 12.6953 7.375 12.4609 7.58594Z"
-                              fill="black"
-                            />
-                          </g>
-                        </svg>
+                        <CircleChevron open={scenarioOpened} />
                       </div>
                     </PopoverTrigger>
                     <PopoverContent className="w-56.25 p-0 my-1.25 rounded-none shadow-[0_-10px_10px_-5px_rgba(0,0,0,0.1)]">
