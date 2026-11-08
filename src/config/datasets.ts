@@ -1290,42 +1290,64 @@ export const comparisonMapContext = (
 
 export const eventTypes: Record<
   string,
-  { type: string; singularType: string; color: string }
+  // tag: short label for the event-type pill (e.g. "Cyclone"); filters use the full names
+  // tagText: text/icon colour on the tag, chosen for contrast (WCAG): dark on light colours
+  {
+    type: string;
+    singularType: string;
+    color: string;
+    tag: string;
+    tagText: "dark" | "light";
+  }
 > = {
   AL: {
     type: "All Events",
     singularType: "",
     color: "",
+    tag: "",
+    tagText: "light",
   },
   EQ: {
     type: "Earthquakes",
     singularType: "Earthquake",
     color: "var(--green)",
+    tag: "Earthquake",
+    tagText: "dark",
   },
   TC: {
     type: "Tropical Cyclones",
     singularType: "Tropical Cyclone",
     color: "var(--red)",
+    tag: "Cyclone",
+    tagText: "light",
   },
   DR: {
     type: "Droughts",
     singularType: "Drought",
     color: "var(--purple)",
+    tag: "Drought",
+    tagText: "light",
   },
   FL: {
     type: "Flooding",
     singularType: "Flooding",
     color: "var(--cyan)",
+    tag: "Flood",
+    tagText: "dark",
   },
   VO: {
     type: "Volcanic Eruptions",
     singularType: "Volcanic Eruption",
     color: "var(--yellow)",
+    tag: "Volcano",
+    tagText: "dark",
   },
   WF: {
     type: "Wildfires",
     singularType: "Wildfire",
     color: "var(--orange)",
+    tag: "Wildfire",
+    tagText: "dark",
   },
 };
 
