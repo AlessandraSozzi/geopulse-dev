@@ -155,6 +155,15 @@ function Events() {
   const [focusedSliderValue, setFocusedSliderValue] = useState<number[]>([0]);
   const [focusedSliderPlaying, setFocusedSliderPlaying] =
     useState<boolean>(false);
+  // date tooltip above the timeline thumb: shown while dragging or playing, hidden ~1.2 s after dragging
+  const [episodeTipVisible, setEpisodeTipVisible] = useState<boolean>(false);
+  const episodeTipTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const showEpisodeTip = (hideAfterMs?: number) => {
+    setEpisodeTipVisible(true);
+    if (episodeTipTimer.current) clearTimeout(episodeTipTimer.current);
+    if (hideAfterMs !== undefined)
+      episodeTipTimer.current = setTimeout(() => setEpisodeTipVisible(false), hideAfterMs);
+  };
   const [focusedCountryExposures, setFocusedCountryExposures] =
     useState<any>(null);
 
@@ -1846,7 +1855,7 @@ function Events() {
                       </svg>
                     </div>
                   )}
-                  <div className="flex flex-col justify-center h-full w-full">
+                  <div className="relative flex flex-col justify-center h-full w-full">
                     <Slider
                       className="mr-6 z-2 [&_[data-slot=slider-track]]:bg-(--primarygray-50) [&_[data-slot=slider-range]]:bg-(--primaryblue-100) [&_[data-slot=slider-thumb]]:border-(--primaryblue-100) [&_[data-slot=slider-thumb]]:border-2 cursor-pointer "
                       step={1}
@@ -1856,6 +1865,7 @@ function Events() {
                       value={focusedSliderValue}
                       onValueChange={(value) => {
                         setFocusedSliderValue(value);
+                        showEpisodeTip(1200);
                         // apply polygon based on slider value, if features exist
                         if (focusedFeatures) {
                           applyPolygon(focusedFeatures[value[0]]);
@@ -1863,6 +1873,58 @@ function Events() {
                         }
                       }}
                     />
+                    {/* episode dots: one per slider stop, at the thumb's centre for that stop
+                        (Radix keeps the 16px thumb inside the track: centre = 8px + f × (width − 16px)).
+                        Ends and the current position are skipped (covered by the track ends / thumb).
+                        The overlay spans the same full width as the slider: its w-full + mr-6 doesn't
+                        shrink it, so a right inset here would squeeze the dots. */}
+                    {focusedFeatures?.length > 2 && (
+                      <div className="pointer-events-none absolute inset-0 z-3" aria-hidden>
+                        {Array.from({ length: focusedFeatures.length }, (_, i) => {
+                          const last = focusedFeatures.length - 1;
+                          if (i === 0 || i === last || i === focusedSliderValue[0]) return null;
+                          // one mark per distinct day: skip episodes published on the same day as the
+                          // previous one (the slider still steps through every episode)
+                          const day = (k: number) => {
+                            const raw = focusedFeatures[k]?.[0]?.attributes?.polygondate;
+                            return raw ? new Date(raw).toDateString() : `episode-${k}`;
+                          };
+                          if (day(i) === day(i - 1)) return null;
+                          return (
+                            <span
+                              key={i}
+                              className="absolute top-1/2 size-[3px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white"
+                              style={{ left: `calc(8px + (100% - 16px) * ${i / last})` }}
+                            />
+                          );
+                        })}
+                      </div>
+                    )}
+                    {/* date of the episode under the thumb, e.g. "Aug 17" (episode polygondate) */}
+                    {(() => {
+                      const last = (focusedFeatures?.length ?? 1) - 1;
+                      const i = focusedSliderValue[0] ?? 0;
+                      const raw = focusedFeatures?.[i]?.[0]?.attributes?.polygondate;
+                      if (!raw || last < 1) return null;
+                      const label = new Date(raw).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                      });
+                      const visible = episodeTipVisible || focusedSliderPlaying;
+                      return (
+                        <div
+                          className={`pointer-events-none absolute bottom-full z-3 mb-1.5 -translate-x-1/2 transition-opacity duration-200 ${visible ? "opacity-100" : "opacity-0"}`}
+                          // same position as the thumb; clamped so it never spills out of the track at the ends
+                          style={{ left: `clamp(24px, calc(8px + (100% - 16px) * ${i / last}), calc(100% - 24px))` }}
+                          aria-hidden
+                        >
+                          <div className="whitespace-nowrap rounded-md bg-(--accentdarkblue-100) px-2 py-0.5 text-[11px] font-bold text-white shadow-md">
+                            {label}
+                          </div>
+                          <div className="mx-auto -mt-1 size-2 rotate-45 bg-(--accentdarkblue-100)" />
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
                 <div className="flex flex-row h-5 justify-center items-center w-full gap-x-2 px-4">
