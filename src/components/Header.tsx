@@ -4,7 +4,6 @@ import { useRouterState, Link } from "@tanstack/react-router";
 
 import { AppStateContext, AppActionsContext } from "../app";
 
-import DataIcon from "../assets/data_icon.svg";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -54,6 +53,7 @@ import {
   CircleChevron,
   CloseIcon,
   CompareIcon,
+  DataExplainerIcon,
   DataOptionsIcon,
   EventTrackingIcon,
   EventTypeIcon,
@@ -449,7 +449,7 @@ export const Header = () => {
           >
             <button
               type="button"
-              className="h-7/10 flex w-9/10 items-center justify-evenly rounded-lg bg-(--accentblue-30) cursor-pointer outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#234E90]"
+              className="h-7/10 flex w-9/10 items-center justify-evenly rounded-lg bg-(--lightblue) cursor-pointer outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#234E90]"
               onClick={() => setDataOptions(true)}
             >
               <DataOptionsIcon />
@@ -479,7 +479,7 @@ export const Header = () => {
           <div className="flex w-full xl:w-auto xl:ml-1 xl:col-start-1 xl:col-end-2">
             <Card
               className={cn(
-                `relative z-1 rounded-none p-0 flex flex-col items-center justify-center w-full gap-0 hover:bg-white transition-colors duration-200 ${location.pathname == "/events" ? "bg-white" : "bg-(--accentblue-30)"} border-0`,
+                `relative z-1 rounded-none p-0 flex flex-col items-center justify-center w-full gap-0 hover:bg-white transition-colors duration-200 ${location.pathname == "/events" ? "bg-white" : "bg-(--lightblue)"} border-0`,
                 tabEdge,
               )}
             >
@@ -644,7 +644,7 @@ export const Header = () => {
             )}
           >
             <Card
-              className={`shadow-none rounded-none xl:grow p-0 w-full h-full flex flex-col items-center justify-end gap-0 hover:bg-white transition-colors duration-200 ${location.pathname == "/compare" || location.pathname == "/grid" ? "bg-white" : "bg-(--accentblue-30)"} border-0`}
+              className={`shadow-none rounded-none xl:grow p-0 w-full h-full flex flex-col items-center justify-end gap-0 hover:bg-white transition-colors duration-200 ${location.pathname == "/compare" || location.pathname == "/grid" ? "bg-white" : "bg-(--lightblue)"} border-0`}
             >
               <div className="text-[11px] font-bold text-(--primaryblack-90)">
                 FORWARD LOOKING
@@ -697,7 +697,7 @@ export const Header = () => {
           <button
             type="button"
             aria-label="Close data options"
-            className="bg-(--accentblue-30) hover:bg-white w-full h-full col-start-3 row-start-1 flex justify-center items-center cursor-pointer xl:h-0 xl:w-0 xl:hidden outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#234E90]"
+            className="bg-(--lightblue) hover:bg-white w-full h-full col-start-3 row-start-1 flex justify-center items-center cursor-pointer xl:h-0 xl:w-0 xl:hidden outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#234E90]"
             onClick={() => setDataOptions(false)}
           >
             <div className=" flex items-center flex-center">
@@ -875,7 +875,7 @@ export const Header = () => {
               // outline always (so it reads as a box on white); shadow only on the map pages, like the tabs
               // keyboard focus underlines the label (parent is overflow-hidden, so an outline would be clipped)
               className={cn(
-                "group flex flex-col items-center justify-center ml-1 xl:z-3 w-18.25 gap-y-1 cursor-pointer bg-white outline-none",
+                "group flex flex-col items-center justify-center ml-1 xl:z-3 w-18.25 gap-y-1 cursor-pointer bg-(--lightblue) hover:bg-white transition-colors duration-200 outline-none",
                 tabOutline,
                 !lightPage && tabShadow,
               )}
@@ -883,7 +883,7 @@ export const Header = () => {
                 actions?.setDataExplainerState(true);
               }}
             >
-              <img src={DataIcon} width={15}></img>
+              <DataExplainerIcon />
               <span className="font-bold text-black text-xs text-base/5 underline-offset-4 group-focus-visible:underline">
                 Data Explainer
               </span>
