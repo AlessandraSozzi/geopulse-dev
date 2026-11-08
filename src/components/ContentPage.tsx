@@ -37,16 +37,18 @@ export function ContentPage({
 }
 
 export function Section({
+  id,
   title,
   description,
   children,
 }: {
+  id?: string; // jump target; scroll-mt keeps the heading clear of the fixed header
   title: string;
   description?: string;
   children: ReactNode;
 }) {
   return (
-    <section className="mt-16">
+    <section id={id} className="mt-16 scroll-mt-20">
       <h2 className="text-[28px] font-bold leading-tight">{title}</h2>
       {description && (
         <p className="mt-2 text-[14px] text-[#3D4A5C]">{description}</p>
