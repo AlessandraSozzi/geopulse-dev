@@ -1215,7 +1215,7 @@ function Events() {
               viewBox="0 0 24 24"
               fill="none"
             >
-              <path d={exposureSVGs[exposure]} fill="#234E90" />
+              <path d={exposureSVGs[exposure]} fill="black" />
             </svg>
           </div>
         </div>
@@ -1243,7 +1243,7 @@ function Events() {
               </span>
               <span className="text-[11px] text-left font-bold">
                 {
-                  <div className="text-[#234E90] growAnimation flex flex-col gap-y-0.5">
+                  <div className="text-black growAnimation flex flex-col gap-y-0.5">
                     {currentCountryExposure !== "ALL" ? (
                       focusedCountryExposures ? (
                         <>
@@ -1258,7 +1258,7 @@ function Events() {
                           </div>
                           <div className="bg-[#E3E9F1] growAnimation rounded-xl h-1 w-full flex item-stretch items-start">
                             <div
-                              className="bg-[#234E90] rounded-xl h-full"
+                              className="bg-black rounded-xl h-full"
                               style={{
                                 width: `${exposurePercentage}%`,
                               }}
@@ -1300,11 +1300,11 @@ function Events() {
               <div className="flex w-full gap-1.5 items-center">
                 <div className="bg-[#E3E9F1] rounded-xl h-1 w-full flex item-stretch items-start">
                   <div
-                    className="bg-[#234E90] rounded-xl h-full w-8/10 growAnimation"
+                    className="bg-black rounded-xl h-full w-8/10 growAnimation"
                     style={{ width: `25%` }}
                   ></div>
                 </div>
-                <span className="text-[#234E90] text-[10px] font-bold">
+                <span className="text-black text-[10px] font-bold">
                   N/A
                 </span>
               </div>
@@ -1328,7 +1328,7 @@ function Events() {
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <path d={exposureSVGs[exposure]} fill="#234E90" />
+            <path d={exposureSVGs[exposure]} fill="black" />
           </svg>
           <span className="text-[#4A5A70] text-[12px] font-bold">
             {exposure}
@@ -1347,7 +1347,7 @@ function Events() {
           )}
           <span className="text-[11px] text-left font-bold">
             {
-              <div className="text-[#234E90]">
+              <div className="text-black">
                 {currentCountryExposure !== "ALL" ? (
                   focusedCountryExposures ? (
                     <>
@@ -1360,7 +1360,7 @@ function Events() {
                       </span>
                       <div className="bg-[#E3E9F1] rounded-xl h-1 w-full flex item-stretch items-start growAnimation">
                         <div
-                          className="bg-[#234E90] rounded-xl h-full"
+                          className="bg-black rounded-xl h-full"
                           style={{
                             width: `${exposurePercentage}%`,
                           }}
@@ -1533,7 +1533,7 @@ function Events() {
             onPointerMove={onPointerMove}
             onPointerUp={(e) => onPointerUp(e)}
           >
-            <div className="rounded-t-lg px-5 py-4 shadow-[0px_4px_5.8px_0px_#00000024] bg-[#242558] text-white flex flex-row items-center justify-between">
+            <div className="rounded-t-lg px-5 py-4 shadow-[0px_4px_5.8px_0px_#00000024] bg-(--accentdarkblue-100) text-white flex flex-row items-center justify-between">
               <div className="w-full flex flex-col items-start justify-center">
                 <div className="h-4 w-full flex items-end justify-center md:hidden">
                   <div className="w-15 h-1 bg-(--accentcoolgray-60) rounded-xl"></div>
@@ -1619,7 +1619,7 @@ function Events() {
                       </div>
                     ) : null}
                   </h3>
-                  <h3 className="font-bold text-[16px]">
+                  <h3 className="font-bold text-[16px] text-(--fundblue)">
                     {event.attributes.description}
                   </h3>
                   <p className="text-[14px] flex items-center">
@@ -1660,7 +1660,7 @@ function Events() {
                   </p>
                   <div className="flex w-full justify-between ">
                     <div
-                      className="flex h-6.25 gap-1.5 px-2.25 [text-box:trim-both_cap_alphabetic] items-center justify-center font-bold cursor-pointer bg-[#234E90] text-white rounded-sm shadow-lg/10 mb-[6px] mt-[9px] text-[12px]"
+                      className="flex h-6.25 gap-1.5 px-2.25 [text-box:trim-both_cap_alphabetic] items-center justify-center font-bold cursor-pointer bg-(--fundblue) hover:bg-(--fundblue)/90 text-white rounded-sm shadow-lg/10 mb-[6px] mt-[9px] text-[12px]"
                       onClick={() =>
                         focusOnEvent(event.geometry, event.attributes)
                       }
@@ -1689,7 +1689,7 @@ function Events() {
         <div
           className={`z-2 absolute bottom-0 right-0 md:transition-all md:duration-600 md:ease-in-out ${eventPopup == "focused event" ? "md:right-0 visible" : "md:-right-100 invisible"} h-6/10 md:h-85/100 w-full md:w-[385px] shadow-lg/40 md:rounded-2xl flex flex-col items-start  cursor-default transition-all ease-in-out duration-300 overflow-y-auto`}
         >
-          <div className="flex flex-col bg-[#242558] w-full gap-y-3 px-4 py-4 rounded-t-xl">
+          <div className="flex flex-col bg-(--accentdarkblue-100) w-full gap-y-3 px-4 py-4 rounded-t-xl">
             <div className="flex flex-row rounded-t-lg items-center gap-2">
               <div className="w-9/10 flex flex-row gap-2">
                 {/* status badge: same translucent pill for ongoing and past events;
@@ -1787,7 +1787,22 @@ function Events() {
                 <div className="flex justify-between font-bold text-[10px] w-full py-4 px-4">
                   <span className="text-[#6B7890]">TIMELINE</span>
                   <span className="text-[#4999D0]">
-                    Full event · {focusedFeatures?.length - 1} days
+                    {(() => {
+                      // real duration from the event dates, counting first and last day
+                      // (was the number of episode steps, e.g. "11 days" for a ~6-month drought)
+                      const DAY = 24 * 60 * 60 * 1000;
+                      const days =
+                        Math.round(
+                          (new Date(focusedEvent.todate).getTime() -
+                            new Date(focusedEvent.fromdate).getTime()) /
+                            DAY,
+                        ) + 1;
+                      return (
+                        <>
+                          Full event · {days} {days === 1 ? "day" : "days"}
+                        </>
+                      );
+                    })()}
                   </span>
                 </div>
                 <div className="flex flex-row h-5 justify-center items-center w-full gap-x-2 px-4">
@@ -1916,7 +1931,7 @@ function Events() {
                 </div>
                 <div className="text-left flex flex-wrap text-[14px] gap-3">
                   <div
-                    className={`[text-box:trim-both_cap_alphabetic] rounded-xl h-6 whitespace-nowrap px-3  ${currentCountryExposure == "ALL" ? "bg-[#234E90] text-white" : "bg-(--accentwarmgray-20)"} font-bold flex items-center justify-center cursor-pointer`}
+                    className={`[text-box:trim-both_cap_alphabetic] rounded-xl h-6 whitespace-nowrap px-3  ${currentCountryExposure == "ALL" ? "bg-(--accentdarkblue-100) text-white" : "bg-(--lightblue) text-(--accentdarkblue-100) hover:brightness-95"} font-bold flex items-center justify-center cursor-pointer`}
                     onClick={() => setCurrentCountryExposure("ALL")}
                   >
                     <div className="[text-box:trim-both_cap_alphabetic]">
@@ -1929,7 +1944,7 @@ function Events() {
                       if (i < 3) {
                         return (
                           <div
-                            className={`rounded-xl h-6 whitespace-nowrap px-3 ${currentCountryExposure == a ? "bg-(--accentblue-100) text-white" : "bg-(--accentwarmgray-20)"} font-bold flex items-center justify-center cursor-pointer`}
+                            className={`rounded-xl h-6 whitespace-nowrap px-3 ${currentCountryExposure == a ? "bg-(--accentdarkblue-100) text-white" : "bg-(--lightblue) text-(--accentdarkblue-100) hover:brightness-95"} font-bold flex items-center justify-center cursor-pointer`}
                             onClick={() => {
                               setCurrentCountryExposure(a);
                               console.log(
@@ -1950,7 +1965,7 @@ function Events() {
                     })}
                   {focusedEvent?.affectedcountries?.split(",")?.length > 3 ? (
                     <div
-                      className={`rounded-xl overflow-hidden h-5 px-2 py-3 ${focusedEvent?.affectedcountries?.split(",")?.find((a, i) => a == currentCountryExposure && i > 2) ? "bg-(--accentblue-100) text-white" : "bg-(--accentwarmgray-20)"}  font-bold flex items-center justify-center`}
+                      className={`rounded-xl overflow-hidden h-5 px-2 py-3 ${focusedEvent?.affectedcountries?.split(",")?.find((a, i) => a == currentCountryExposure && i > 2) ? "bg-(--accentdarkblue-100) text-white" : "bg-(--lightblue) text-(--accentdarkblue-100) hover:brightness-95"}  font-bold flex items-center justify-center`}
                       onClick={() =>
                         setOtherCountryDropdownStatus(
                           !otherCountryDropdownStatus,
@@ -1992,7 +2007,7 @@ function Events() {
                             >
                               <path
                                 d="M11.0949 5.35484C11.2349 5.49484 11.2349 5.70484 11.0949 5.84484L7.27289 9.68784C7.23711 9.72382 7.19458 9.75238 7.14773 9.77186C7.10087 9.79134 7.05063 9.80137 6.99989 9.80137C6.94915 9.80137 6.89891 9.79134 6.85206 9.77186C6.80521 9.75238 6.76267 9.72382 6.72689 9.68784L2.90489 5.84484C2.86478 5.81476 2.83159 5.7764 2.80759 5.73237C2.78359 5.68835 2.76933 5.63967 2.76577 5.58966C2.76222 5.53964 2.76945 5.48944 2.78699 5.44246C2.80452 5.39548 2.83195 5.35281 2.86741 5.31736C2.90286 5.2819 2.94553 5.25447 2.99251 5.23694C3.03949 5.2194 3.08968 5.21217 3.1397 5.21572C3.18972 5.21928 3.23839 5.23354 3.28242 5.25754C3.32645 5.28154 3.36481 5.31473 3.39489 5.35484L6.99989 8.95984L10.6049 5.34784C10.7449 5.20784 10.9549 5.20784 11.0949 5.34784"
-                                fill={`${focusedEvent?.affectedcountries?.split(",")?.find((a, i) => a == currentCountryExposure && i > 2) ? "white" : "black"}`}
+                                fill={`${focusedEvent?.affectedcountries?.split(",")?.find((a, i) => a == currentCountryExposure && i > 2) ? "white" : "var(--accentdarkblue-100)"}`}
                               />
                             </svg>
                           </Button>
@@ -2067,7 +2082,7 @@ function Events() {
               </div>
               <div className="w-full flex items-center p-5 gap-2 bg-white">
                 <Link to="/datamethodology">
-                  <u className="cursor-pointer font-bold text-left text-[13px] text-[#234E90] no-underline">
+                  <u className="cursor-pointer font-bold text-left text-[13px] text-(--accentdarkblue-100) no-underline">
                     Explore Methodology
                   </u>
                 </Link>
@@ -2080,7 +2095,7 @@ function Events() {
                 >
                   <path
                     d="M7.5879 2.19089C7.51921 2.12777 7.42826 2.09452 7.33505 2.09846C7.24185 2.1024 7.15402 2.1432 7.0909 2.21189C7.02778 2.28058 6.99453 2.37153 6.99847 2.46474C7.00241 2.55795 7.04321 2.64577 7.1119 2.70889L11.4309 6.64989H1.7499C1.65708 6.64989 1.56805 6.68677 1.50242 6.7524C1.43678 6.81804 1.3999 6.90706 1.3999 6.99989C1.3999 7.09272 1.43678 7.18174 1.50242 7.24738C1.56805 7.31302 1.65708 7.34989 1.7499 7.34989H11.4309L7.1119 11.2909C7.04321 11.354 7.00241 11.4418 6.99847 11.535C6.99453 11.6282 7.02778 11.7192 7.0909 11.7879C7.15402 11.8566 7.24185 11.8974 7.33505 11.9013C7.42826 11.9053 7.51921 11.872 7.5879 11.8089L12.4249 7.38489C12.4779 7.33575 12.5202 7.27618 12.5491 7.20993C12.578 7.14368 12.593 7.07218 12.593 6.99989C12.593 6.9276 12.578 6.8561 12.5491 6.78985C12.5202 6.7236 12.4779 6.66404 12.4249 6.61489L7.5879 2.19089Z"
-                    fill="#234E90"
+                    fill="var(--accentdarkblue-100)"
                   />
                 </svg>
               </div>
@@ -2127,7 +2142,7 @@ function Events() {
                   // yes/no category rasters (e.g. cropland): one square swatch, no scale
                   <div className="mt-3 flex items-center gap-3">
                     <span
-                      className="size-3 shrink-0 rounded-[2px]"
+                      className="size-3 shrink-0 rounded-[2px] ring-1 ring-white/20"
                       style={{ backgroundColor: `rgb(${rgb})` }}
                     />
                     <span className="text-[13px] text-white">
@@ -2138,7 +2153,8 @@ function Events() {
                   // continuous raster layers: colour bar with class labels
                   <>
                     <div
-                      className="mt-3 h-2 w-full rounded-xs"
+                      // soft outline so dark first classes don't disappear into the dark panel
+                      className="mt-3 h-2 w-full rounded-xs ring-1 ring-white/20"
                       style={{
                         background: `linear-gradient(to right, ${exposure.colorScheme.map((e, i) => "rgba(" + e.symbol.color.join(",") + ") " + (i / exposure.colorScheme.length) * 100 + "%," + " rgba(" + e.symbol.color.join(",") + ") " + ((i + 1) / exposure.colorScheme.length) * 100 + "% ").join(",")})`,
                       }}
@@ -2154,8 +2170,8 @@ function Events() {
                             className="absolute top-0 flex -translate-x-1/2 flex-col items-center"
                             style={{ left: `${left}%` }}
                           >
-                            <span className="h-1 w-px bg-[#8E8E93]" />
-                            <span className="mt-0.5 whitespace-nowrap text-[11px] text-[#C7C7CC]">
+                            <span className="h-1 w-px bg-white/50" />
+                            <span className="mt-0.5 whitespace-nowrap text-[11px] font-medium text-white">
                               {String(e.label).replace(/^[<>]\s*/, "")}
                             </span>
                           </div>
