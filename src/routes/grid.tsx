@@ -11,6 +11,7 @@ import ScaleBar from "@arcgis/core/widgets/ScaleBar.js";
 
 import { buildGridUrl, buildGridLegend } from "@/config/datasets";
 import { Thresholds } from "@/components/thresholds";
+import { cn } from "@/lib/utils";
 import ImageryTileLayer from "@arcgis/core/layers/ImageryTileLayer";
 import VectorTileLayer from "@arcgis/core/layers/VectorTileLayer.js";
 
@@ -24,8 +25,6 @@ function GridView() {
   actions?.setView("Event tracking");
 
   const [position, setPosition] = useState({});
-
-  const [tooltipValue, setTooltipValue] = useState("");
 
   const [isolatedField, setIsolatedField] = useState<number | null>(null);
   const [hoveredField, setHoveredField] = useState<number | null>(null);
@@ -245,13 +244,27 @@ function GridView() {
 
   const legend = state ? buildGridLegend(state) : undefined;
 
-  // tooltip text for a legend cell, e.g. "High Population & Medium Flood Height"
+  // legend matrix layout: rows top→bottom = high→low exposure, columns left→right = low→high hazard
+  const cellOrder = [7, 8, 9, 4, 5, 6, 1, 2, 3];
+  const byField: Record<number, string> = Object.fromEntries(
+    Object.values(colors).map((c) => [c.field, c.colorValue]),
+  );
+  const yTickColors = ["#8E8E93", "#9C8BB5", "#A97CF2"]; // low, mid, high
+  const xTickColors = ["#8E8E93", "#5FAE9F", "#4FD1BC"];
+
+  // cell that is popped + labelled: hovered first, otherwise the clicked/isolated one
+  const activeField = hoveredField ?? isolatedField;
+
+  // tooltip text for a legend cell, e.g. "High Population" / "Low Flood"
   const levels = ["Low", "Medium", "High"];
-  const shortLabel = (label: string) => label.replace(/\s*\(.*\)$/, ""); // drop "(count)" etc.
-  const cellLabel = (field: number) =>
+  const hazardShort = legend ? legend.hazardAxis.replace(/\s*height$/i, "") : "";
+  const tooltipLines = (field: number) =>
     legend
-      ? `${levels[Math.floor((field - 1) / 3)]} ${shortLabel(legend.exposure)} & ${levels[(field - 1) % 3]} ${shortLabel(legend.hazard)}`
-      : "";
+      ? [
+          `${levels[Math.floor((field - 1) / 3)]} ${legend.exposureAxis}`,
+          `${levels[(field - 1) % 3]} ${hazardShort}`,
+        ]
+      : ["", ""];
 
   useEffect(() => {
     if (!map.current) return;
@@ -279,7 +292,6 @@ function GridView() {
             for (const value of Object.values(colors)) {
               if (e.pixelValue[0] == value.field) {
                 if (isolatedField == null || isolatedField == value.field) {
-                  showTooltip(cellLabel(value.field));
                   setHoveredField(value.field);
                 }
               }
@@ -287,7 +299,6 @@ function GridView() {
           }
         })
       } else {
-        hideTooltip();
         setHoveredField(null);
       }
     });
@@ -332,63 +343,86 @@ function GridView() {
     }
   }
 
-  const showTooltip = (value: string) => {
-    const el = document.querySelector<HTMLElement>("#tooltip");
-    if (!el) return;
-    el.style.visibility = "visible";
-    el.style.transform = "translateY(-1.1rem) scale(1.1)";
-    el.style.opacity = "1";
-    setTooltipValue(value);
-  };
-
-  const hideTooltip = () => {
-    if (isolatedField == null) {
-      const el = document.querySelector<HTMLElement>("#tooltip");
-      if (!el) return;
-      el.style.visibility = "hidden";
-      el.style.transform = "translateY(0) scale(1)";
-      el.style.opacity = "0";
-    }
-  };
-
   return (
     <div className="h-full">
       <div className="w-full h-full bg-[#1D2224] " ref={ref}></div>
       <Thresholds />
       {legend && (
-      <div className='absolute bottom-0 left-0 flex flex-col items-start justify-end rounded-xs bg-white w-50 h-51'>
-        <div id="newLegend" onMouseLeave={() => hideTooltip()} className='w-full'>
-          <div className='absolute bottom-46 w-full flex  justify-center'>
-            <div id="tooltip" className='invisible opacity-0 shadow-xl/20 rounded-md flex h-15 w-40 items-center justify-center bg-(--accentdarkblue-80) transition-all delay-150 duration-300 ease-in-out'>
-              <div className='text-white text-[10px] w-9/10'><strong>{tooltipValue}</strong></div>
-            </div>
+      <div className="absolute bottom-2 left-2 w-64 rounded-lg border border-[#2A3B5F] bg-[#1B1B1D] p-3.5 text-white shadow-lg">
+        <h3 className="text-[12px] font-bold uppercase leading-tight tracking-wide">{legend.title}</h3>
+        <p className="mt-0.5 text-[11px] text-[#8E8E93]">{legend.subtitle}</p>
+
+        <div id="newLegend" className="mt-3 grid grid-cols-[auto_auto_auto] justify-start gap-x-2">
+          {/* y axis: label + arrow */}
+          <div className="flex items-stretch gap-1">
+            <span className="rotate-180 text-center text-[11px] text-[#A97CF2] [writing-mode:vertical-rl]">{legend.exposureAxis}</span>
+            <svg width="8" className="h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 8 112">
+              <path d="M4 112V2M1 6l3-4 3 4" stroke="#A97CF2" strokeWidth="1.5" fill="none" />
+            </svg>
           </div>
-          <div className='w-5/10 flex'>
-            <div className='flex w-10 h-30 items-center justify-center'>
-              <div className="text-[10px] rotate-270 whitespace-nowrap"><strong>{legend.exposure}</strong></div>
-            </div>
-            <div className="">
-              <div className='flex w-30 h-30 flex-wrap flex-row-reverse'>
-                {Object.values(colors).map((value) => (
-                  <div key={value.field}
-                    style={{ backgroundColor: value.colorValue, borderColor: (hoveredField == value.field) ? "#e08b84" : (isolatedField == value.field) ? "#e15449" : value.colorValue}} 
-                    className={`cursor-pointer w-10 h-10 border-2 transition-all duration-100`} 
-                    onClick={() => isolateField(value.field, "exposure")} 
-                    onMouseOver={() => { showTooltip(cellLabel(value.field)); setHoveredField(value.field); }} 
-                    onMouseOut={() => setHoveredField(null)} 
-                    onTouchStart={() => showTooltip(cellLabel(value.field))}>
-                  </div>
-                ))}
-              </div>
-              <div className='w-full h-10 flex justify-center items-center'>
-                <div className="text-[10px]"><strong>{legend.hazard}</strong></div>
-              </div>
-            </div>
+
+          {/* y ticks (high → low) */}
+          <div className="flex flex-col gap-0.5">
+            {[2, 1, 0].map((i) => (
+              <span key={i} className="flex h-9 items-center justify-end whitespace-nowrap text-[11px]" style={{ color: yTickColors[i] }}>
+                {legend.exposureClasses[i]}
+              </span>
+            ))}
           </div>
+
+          {/* matrix */}
+          <div className="grid w-28 grid-cols-3 gap-0.5">
+            {cellOrder.map((field, i) => {
+              const active = activeField === field;
+              const [line1, line2] = tooltipLines(field);
+              return (
+                <div key={field} className={cn("relative size-9", active && "z-10")}>
+                  <div
+                    className={cn(
+                      "size-full cursor-pointer transition-all duration-150",
+                      active && "scale-115 shadow-[0_4px_12px_rgba(0,0,0,0.5)]",
+                      isolatedField != null && isolatedField !== field && "opacity-30",
+                    )}
+                    style={{
+                      backgroundColor: byField[field],
+                      outline: active ? "1.5px solid rgba(255,255,255,0.9)" : "none",
+                      outlineOffset: active ? -1.5 : 0, // draw inside the square
+                    }}
+                    onClick={() => isolateField(field, "exposure")}
+                    onMouseEnter={() => setHoveredField(field)}
+                    onMouseLeave={() => setHoveredField(null)}
+                    onTouchStart={() => setHoveredField(field)}
+                  />
+                  {active && (
+                    <div
+                      className={cn(
+                        "pointer-events-none absolute -top-2.5 z-20 w-max rounded-md bg-black px-2.5 py-1.5 text-center text-[10px] font-bold leading-snug text-white shadow-lg",
+                        i % 3 === 0 ? "right-[40%]" : "left-[40%]", // left column opens leftwards
+                      )}
+                    >
+                      {line1}<br />{line2}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* x ticks, arrow, label (under the matrix only) */}
+          <div className="col-start-3 mt-1.5 grid w-28 grid-cols-3 gap-0.5 text-center text-[11px]">
+            {legend.hazardClasses.map((c, i) => (
+              <span key={c} className="whitespace-nowrap" style={{ color: xTickColors[i] }}>{c}</span>
+            ))}
+          </div>
+          <svg className="col-start-3 mt-1 w-28 overflow-visible" height="8" viewBox="0 0 112 8">
+            <path d="M0 4h110M106 1l4 3-4 3" stroke="#4FD1BC" strokeWidth="1.5" fill="none" />
+          </svg>
+          <span className="col-start-3 mt-1 w-28 text-center text-[11px] text-[#4FD1BC]">{legend.hazardAxis}</span>
         </div>
-        <div className='w-full px-2 pb-1 text-[9px] text-left text-[#555555]'>
-          {legend.source}
-        </div>
+
+        <p className="mt-3 text-[10px] leading-snug text-[#A1A1A6]">
+          {legend.note} {legend.source}
+        </p>
       </div>
       )}
     </div>
