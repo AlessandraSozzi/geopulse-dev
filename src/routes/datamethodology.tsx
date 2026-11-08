@@ -23,7 +23,7 @@ const linkCls =
 // TODO: buttons have no link/handler yet; wire up once the download/API URLs are known
 const buttonCls =
   "inline-flex h-8 w-fit items-center rounded-md bg-[#234E90] px-3.5 text-[13px] font-bold text-white transition-opacity hover:opacity-90 cursor-pointer";
-const thumbCls = "rounded-md border border-[#E3E9F1]";
+const thumbCls = "rounded-full"; // images are already circular with their own ring
 
 // jump buttons under the intro
 const pageSections = [
