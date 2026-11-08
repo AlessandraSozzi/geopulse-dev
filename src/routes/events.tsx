@@ -37,7 +37,26 @@ import { Slider } from "@/components/ui/slider";
 import Exposures from "../assets/Layers.svg";
 
 // 3rd party icons
-import { Check } from "lucide-react";
+import {
+  Activity,
+  Check,
+  Flame,
+  Mountain,
+  Sun,
+  Waves,
+  Wind,
+  type LucideIcon,
+} from "lucide-react";
+
+// icon for each event type's tag (lucide has no volcano icon, so Mountain stands in)
+const eventTypeIcon: Record<string, LucideIcon> = {
+  EQ: Activity, // earthquake: seismograph line
+  TC: Wind, // tropical cyclone
+  DR: Sun, // drought
+  FL: Waves, // flooding
+  VO: Mountain, // volcanic eruption
+  WF: Flame, // wildfire
+};
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPause } from "@fortawesome/free-solid-svg-icons";
 
@@ -1673,30 +1692,38 @@ function Events() {
           <div className="flex flex-col bg-[#242558] w-full gap-y-3 px-4 py-4 rounded-t-xl">
             <div className="flex flex-row rounded-t-lg items-center gap-2">
               <div className="w-9/10 flex flex-row gap-2">
-                {focusedEvent.iscurrent == 1 ? (
-                  <div className="flex px-3 h-6.25 justify-center items-center bg-(--red) rounded-xl shadow-lg/10 font-bold text-white text-[11px]">
-                    <span className="[text-box:trim-both_cap_alphabetic]">
-                      ONGOING
+                {/* status badge: same translucent pill for ongoing and past events;
+                    ongoing adds the same pulsing red dot as the event list cards */}
+                <span className="flex h-6.5 items-center justify-center gap-1.5 rounded-full bg-white/20 px-3 text-[11px] font-bold uppercase tracking-[0.08em] text-white">
+                  {focusedEvent.iscurrent == 1 && (
+                    <span className="relative flex size-[7px] items-center text-(--red)" aria-hidden>
+                      <span className="absolute inset-0 rounded-full bg-current opacity-70 motion-safe:animate-ping" />
+                      <span className="relative inline-flex size-[7px] rounded-full bg-current" />
                     </span>
-                  </div>
-                ) : (
-                  <b className="flex px-3 h-6.25 justify-center items-center bg-[#FFFFFF14] rounded-xl shadow-lg/10 font-bold text-white text-[11px]">
-                    <span className="[text-box:trim-both_cap_alphabetic]">
-                      PAST EVENT
-                    </span>
-                  </b>
-                )}
+                  )}
+                  <span className="[text-box:trim-both_cap_alphabetic]">
+                    {focusedEvent.iscurrent == 1 ? "Ongoing" : "Past event"}
+                  </span>
+                </span>
                 {focusedEvent ? (
-                  <div
-                    className="flex px-3 items-center justify-center font-bold h-6.25 uppercase text-white rounded-xl text-[11px]"
-                    style={{
-                      backgroundColor: eventTypes[focusedEvent.eventtype].color,
-                    }}
-                  >
-                    <div className="[text-box:trim-both_cap_alphabetic]">
-                      {eventTypes[focusedEvent.eventtype].singularType}
-                    </div>
-                  </div>
+                  (() => {
+                    // event-type pill: icon + short label on the same colour as the map dots
+                    const type = eventTypes[focusedEvent.eventtype];
+                    const Icon = eventTypeIcon[focusedEvent.eventtype];
+                    return (
+                      <span
+                        className={`flex h-6.5 items-center gap-1.5 rounded-full px-3 text-[11px] font-bold uppercase tracking-[0.08em] ${type.tagText === "dark" ? "text-[#1B1B1D]" : "text-white"}`}
+                        style={{ backgroundColor: type.color }}
+                      >
+                        {Icon && (
+                          <Icon className="size-3" strokeWidth={2.5} aria-hidden />
+                        )}
+                        <span className="[text-box:trim-both_cap_alphabetic]">
+                          {type.tag || type.singularType}
+                        </span>
+                      </span>
+                    );
+                  })()
                 ) : (
                   ""
                 )}
