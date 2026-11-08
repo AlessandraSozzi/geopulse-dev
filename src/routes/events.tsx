@@ -1243,9 +1243,11 @@ function Events() {
               </span>
               <span className="text-[11px] text-left font-bold">
                 {
-                  <div className="text-black growAnimation flex flex-col gap-y-0.5">
-                    {currentCountryExposure !== "ALL" ? (
-                      focusedCountryExposures ? (
+                  // smooth expand/collapse: rows animate 0fr <-> 1fr; collapsed for Total
+                  <div className={`grid transition-[grid-template-rows,opacity] duration-300 ease-out ${currentCountryExposure !== "ALL" ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
+                  <div className="min-h-0 overflow-hidden">
+                  <div className="text-black flex flex-col gap-y-0.5">
+                    {focusedCountryExposures ? (
                         <>
                           <div>
                             <span className="growAnimation">
@@ -1258,7 +1260,7 @@ function Events() {
                           </div>
                           <div className="bg-[#E3E9F1] growAnimation rounded-xl h-1 w-full flex item-stretch items-start">
                             <div
-                              className="bg-black rounded-xl h-full"
+                              className="bg-black rounded-xl h-full transition-[width] duration-500 ease-out"
                               style={{
                                 width: `${exposurePercentage}%`,
                               }}
@@ -1267,10 +1269,9 @@ function Events() {
                         </>
                       ) : (
                         "N/A"
-                      )
-                    ) : (
-                      <div className="h-[22.5px]"></div>
-                    )}
+                      )}
+                  </div>
+                  </div>
                   </div>
                 }
               </span>
@@ -1297,16 +1298,24 @@ function Events() {
                 </span>
               </div>
               <span className="text-[#0B1B33] text-[17px] font-bold">N/A</span>
-              <div className="flex w-full gap-1.5 items-center">
-                <div className="bg-[#E3E9F1] rounded-xl h-1 w-full flex item-stretch items-start">
-                  <div
-                    className="bg-black rounded-xl h-full w-8/10 growAnimation"
-                    style={{ width: `25%` }}
-                  ></div>
+              {/* bar row: collapsed for Total, slides open for a country (same as the other blocks).
+                  TODO: sector values and bar widths are placeholders (N/A, fixed 25%) until sector data is wired up */}
+              <div
+                className={`-mt-3 grid w-full transition-[grid-template-rows,opacity] duration-300 ease-out ${currentCountryExposure !== "ALL" ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}
+              >
+                <div className="min-h-0 overflow-hidden">
+                  <div className="mt-3 flex w-full gap-1.5 items-center">
+                    <div className="bg-[#E3E9F1] rounded-xl h-1 w-full flex item-stretch items-start">
+                      <div
+                        className="bg-black rounded-xl h-full transition-[width] duration-500 ease-out"
+                        style={{ width: `25%` }}
+                      ></div>
+                    </div>
+                    <span className="text-black text-[10px] font-bold">
+                      N/A
+                    </span>
+                  </div>
                 </div>
-                <span className="text-black text-[10px] font-bold">
-                  N/A
-                </span>
               </div>
             </div>
           ))}
@@ -1347,9 +1356,11 @@ function Events() {
           )}
           <span className="text-[11px] text-left font-bold">
             {
+              // smooth expand/collapse: rows animate 0fr <-> 1fr; collapsed for Total
+              <div className={`grid transition-[grid-template-rows,opacity] duration-300 ease-out ${currentCountryExposure !== "ALL" ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
+              <div className="min-h-0 overflow-hidden">
               <div className="text-black">
-                {currentCountryExposure !== "ALL" ? (
-                  focusedCountryExposures ? (
+                {focusedCountryExposures ? (
                     <>
                       <span className="growAnimation">
                         {exposurePercentage}
@@ -1360,7 +1371,7 @@ function Events() {
                       </span>
                       <div className="bg-[#E3E9F1] rounded-xl h-1 w-full flex item-stretch items-start growAnimation">
                         <div
-                          className="bg-black rounded-xl h-full"
+                          className="bg-black rounded-xl h-full transition-[width] duration-500 ease-out"
                           style={{
                             width: `${exposurePercentage}%`,
                           }}
@@ -1369,10 +1380,9 @@ function Events() {
                     </>
                   ) : (
                     "N/A"
-                  )
-                ) : (
-                  <div className="h-[32px]"></div>
-                )}
+                  )}
+              </div>
+              </div>
               </div>
             }
           </span>
@@ -1784,9 +1794,9 @@ function Events() {
           <div className="w-full bg-white overflow-y-scroll">
             {focusedFeatures?.length > 1 ? (
               <div className="w-full bg-[#F4F7FB] py-3">
-                <div className="flex justify-between font-bold text-[10px] w-full py-4 px-4">
-                  <span className="text-[#6B7890]">TIMELINE</span>
-                  <span className="text-[#4999D0]">
+                <div className="flex items-baseline justify-between w-full py-4 px-4">
+                  <span className="text-[11px] font-bold tracking-[0.12em] text-[#6B7890]">TIMELINE</span>
+                  <span className="text-[13px] font-bold text-(--primaryblue-100)">
                     {(() => {
                       // real duration from the event dates, counting first and last day
                       // (was the number of episode steps, e.g. "11 days" for a ~6-month drought)
@@ -1808,7 +1818,7 @@ function Events() {
                 <div className="flex flex-row h-5 justify-center items-center w-full gap-x-2 px-4">
                   {focusedSliderPlaying ? (
                     <div
-                      className="flex items-center justify-center z-2 text-6.25 w-6.25 h-6.25 text-white bg-(--accentblue-100) rounded-4xl"
+                      className="flex items-center justify-center z-2 text-6.25 w-6.25 h-6.25 text-white bg-(--primaryblue-100) rounded-4xl"
                       onClick={() => playEvent("pause")}
                     >
                       <FontAwesomeIcon
@@ -1819,7 +1829,7 @@ function Events() {
                     </div>
                   ) : (
                     <div
-                      className="z-2 flex items-center justify-center text-6.25 p-2 text-white bg-(--accentblue-100) rounded-full"
+                      className="z-2 flex items-center justify-center text-6.25 p-2 text-white bg-(--primaryblue-100) rounded-full"
                       onClick={() => playEvent("play")}
                     >
                       <svg
@@ -1838,7 +1848,7 @@ function Events() {
                   )}
                   <div className="flex flex-col justify-center h-full w-full">
                     <Slider
-                      className="mr-6 z-2 [&_[data-slot=slider-track]]:bg-(--primarygray-50) [&_[data-slot=slider-thumb]]:border-[#4999D0] [&_[data-slot=slider-thumb]]:border-2 cursor-pointer "
+                      className="mr-6 z-2 [&_[data-slot=slider-track]]:bg-(--primarygray-50) [&_[data-slot=slider-range]]:bg-(--primaryblue-100) [&_[data-slot=slider-thumb]]:border-(--primaryblue-100) [&_[data-slot=slider-thumb]]:border-2 cursor-pointer "
                       step={1}
                       min={0}
                       // if there are no features, set max to 10 for demonstrative purposes
@@ -1963,56 +1973,45 @@ function Events() {
                         );
                       }
                     })}
-                  {focusedEvent?.affectedcountries?.split(",")?.length > 3 ? (
-                    <div
-                      className={`rounded-xl overflow-hidden h-5 px-2 py-3 ${focusedEvent?.affectedcountries?.split(",")?.find((a, i) => a == currentCountryExposure && i > 2) ? "bg-(--accentdarkblue-100) text-white" : "bg-(--lightblue) text-(--accentdarkblue-100) hover:brightness-95"}  font-bold flex items-center justify-center`}
-                      onClick={() =>
-                        setOtherCountryDropdownStatus(
-                          !otherCountryDropdownStatus,
-                        )
-                      }
-                    >
-                      <div className="text-nowrap max-w-40 flex justify-between cursor-pointer">
-                        {currentCountryExposure !== "ALL" &&
-                        focusedEvent?.affectedcountries
-                          ?.split(",")
-                          ?.find(
-                            (a, i) => a == currentCountryExposure && i > 2,
-                          ) ? (
-                          countryByIso3[currentCountryExposure]
-                        ) : (
-                          <span className="[text-box:trim-both_cap_alphabetic]">
-                            Other
-                          </span>
-                        )}
-                      </div>
+                  {(() => {
+                    // countries after the first three go behind one "+N more" dropdown
+                    const hidden: string[] =
+                      focusedEvent?.affectedcountries?.split(",")?.slice(3) ?? [];
+                    if (hidden.length === 0) return null;
+                    const hiddenSelected = hidden.includes(currentCountryExposure);
+                    return (
                       <Popover
                         open={otherCountryDropdownStatus}
                         onOpenChange={setOtherCountryDropdownStatus}
                       >
+                        {/* the whole chip is the single trigger (was a chip onClick + a separate arrow trigger) */}
                         <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            role="combobox"
-                            aria-expanded={otherCountryDropdownStatus}
-                            className="w-4 h-5.25 font-bold justify-between light border-0 shadow-none p-0 bg-transparent hover:bg-transparent cursor-pointer"
+                          <button
+                            type="button"
+                            className={`flex h-6 items-center gap-1 whitespace-nowrap rounded-xl px-3 font-bold cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-(--accentdarkblue-100)/40 ${hiddenSelected ? "bg-(--accentdarkblue-100) text-white" : "bg-(--lightblue) text-(--accentdarkblue-100) hover:brightness-95"}`}
                           >
+                            <span className="max-w-40 truncate [text-box:trim-both_cap_alphabetic]">
+                              {hiddenSelected
+                                ? countryByIso3[currentCountryExposure]
+                                : `+${hidden.length} more`}
+                            </span>
                             <svg
-                              className={`${otherCountryDropdownStatus ? "rotate-180" : "rotate-0"}`}
+                              className={`shrink-0 transition-transform ${otherCountryDropdownStatus ? "rotate-180" : "rotate-0"}`}
                               xmlns="http://www.w3.org/2000/svg"
                               width="14"
                               height="14"
                               viewBox="0 0 14 14"
                               fill="none"
+                              aria-hidden
                             >
                               <path
                                 d="M11.0949 5.35484C11.2349 5.49484 11.2349 5.70484 11.0949 5.84484L7.27289 9.68784C7.23711 9.72382 7.19458 9.75238 7.14773 9.77186C7.10087 9.79134 7.05063 9.80137 6.99989 9.80137C6.94915 9.80137 6.89891 9.79134 6.85206 9.77186C6.80521 9.75238 6.76267 9.72382 6.72689 9.68784L2.90489 5.84484C2.86478 5.81476 2.83159 5.7764 2.80759 5.73237C2.78359 5.68835 2.76933 5.63967 2.76577 5.58966C2.76222 5.53964 2.76945 5.48944 2.78699 5.44246C2.80452 5.39548 2.83195 5.35281 2.86741 5.31736C2.90286 5.2819 2.94553 5.25447 2.99251 5.23694C3.03949 5.2194 3.08968 5.21217 3.1397 5.21572C3.18972 5.21928 3.23839 5.23354 3.28242 5.25754C3.32645 5.28154 3.36481 5.31473 3.39489 5.35484L6.99989 8.95984L10.6049 5.34784C10.7449 5.20784 10.9549 5.20784 11.0949 5.34784"
-                                fill={`${focusedEvent?.affectedcountries?.split(",")?.find((a, i) => a == currentCountryExposure && i > 2) ? "white" : "var(--accentdarkblue-100)"}`}
+                                fill="currentColor"
                               />
                             </svg>
-                          </Button>
+                          </button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-60 p-0 light rounded-none">
+                        <PopoverContent align="start" className="w-60 p-0 light rounded-none">
                           <Command>
                             <CommandInput
                               placeholder="Search country..."
@@ -2021,44 +2020,36 @@ function Events() {
                             <CommandList>
                               <CommandEmpty>Country not found.</CommandEmpty>
                               <CommandGroup>
-                                {focusedEvent?.affectedcountries
-                                  ?.split(",")
-                                  ?.map((a, i) => {
-                                    if (i > 2) {
-                                      return (
-                                        <CommandItem
-                                          className="data-[selected=true]:bg-white text-left"
-                                          key="all"
-                                          value="All countries"
-                                          onSelect={() => {
-                                            setOtherCountryDropdownStatus(
-                                              false,
-                                            );
-                                            setCurrentCountryExposure(a);
-                                          }}
-                                        >
-                                          <div className="w-90 text-wrap">
-                                            <div>{countryByIso3[a]}</div>
-                                          </div>
-                                          <Check
-                                            className={cn(
-                                              "ml-auto",
-                                              currentCountryExposure === a
-                                                ? "opacity-100"
-                                                : "opacity-0",
-                                            )}
-                                          />
-                                        </CommandItem>
-                                      );
-                                    }
-                                  })}
+                                {/* unique key (ISO) and value (name) per country, so all render and search works */}
+                                {hidden.map((iso) => (
+                                  <CommandItem
+                                    key={iso}
+                                    value={countryByIso3[iso] ?? iso}
+                                    // same light-grey highlight as the header's country dropdown
+                                    className="text-left data-[selected=true]:bg-neutral-200 data-[selected=true]:text-black"
+                                    onSelect={() => {
+                                      setCurrentCountryExposure(iso);
+                                      setOtherCountryDropdownStatus(false);
+                                    }}
+                                  >
+                                    {countryByIso3[iso] ?? iso}
+                                    <Check
+                                      className={cn(
+                                        "ml-auto",
+                                        currentCountryExposure === iso
+                                          ? "opacity-100"
+                                          : "opacity-0",
+                                      )}
+                                    />
+                                  </CommandItem>
+                                ))}
                               </CommandGroup>
                             </CommandList>
                           </Command>
                         </PopoverContent>
                       </Popover>
-                    </div>
-                  ) : null}
+                    );
+                  })()}
                 </div>
               </div>
               {exposureSubComponent("Population")}
@@ -2068,7 +2059,8 @@ function Events() {
               </div>
               {exposureSubComponent("GDP")}
               {sectorSubComponent("GDP")}
-              {exposureSubComponent("Urban GDP")}
+              {/* Urban GDP exposure hidden for now; uncomment to show it again */}
+              {/* {exposureSubComponent("Urban GDP")} */}
               {exposureSubComponent("Capital stock")}
               <div id="divider" className="h-px w-full bg-[#E6EBF2]"></div>
               <div className="font-bold text-[10px] text-left text-[#6B7A90]">
