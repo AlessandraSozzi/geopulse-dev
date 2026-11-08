@@ -406,7 +406,7 @@ export const Header = () => {
             className="flex items-center w-full h-14.75 text-white cursor-pointer"
             onClick={() => setMenuOptions(false)}
           >
-            Team & Contact us
+            Team & Contact Us
           </Link>
         </div>
       </div>
