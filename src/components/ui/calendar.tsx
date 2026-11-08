@@ -1,9 +1,5 @@
 import * as React from "react";
-import {
-  ChevronDownIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-} from "lucide-react";
+import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import {
   DayPicker,
   getDefaultClassNames,
@@ -55,12 +51,12 @@ function Calendar({
         ),
         button_previous: cn(
           buttonVariants({ variant: buttonVariant }),
-          "size-(--cell-size) p-0 select-none aria-disabled:opacity-50",
+          "size-10 rounded-full p-0 select-none aria-disabled:opacity-50",
           defaultClassNames.button_previous,
         ),
         button_next: cn(
           buttonVariants({ variant: buttonVariant }),
-          "size-(--cell-size) p-0 select-none aria-disabled:opacity-50",
+          "size-10 rounded-full p-0 select-none aria-disabled:opacity-50",
           defaultClassNames.button_next,
         ),
         month_caption: cn(
@@ -72,7 +68,7 @@ function Calendar({
           defaultClassNames.dropdowns,
         ),
         dropdown_root: cn(
-          "relative rounded-md border border-input shadow-xs has-focus:border-ring has-focus:ring-[3px] has-focus:ring-ring/50",
+          "relative rounded-md shadow-[0_1px_3px_rgba(16,24,40,0.10)] has-focus:ring-2 has-focus:ring-(--fundblue)/40",
           defaultClassNames.dropdown_root,
         ),
         dropdown: cn(
@@ -83,7 +79,7 @@ function Calendar({
           "font-medium select-none",
           captionLayout === "label"
             ? "text-sm"
-            : "flex h-8 items-center gap-1 rounded-md pr-1 pl-2 text-sm [&>svg]:size-3.5 [&>svg]:text-muted-foreground",
+            : "flex h-9 items-center gap-1 rounded-md pr-1.5 pl-2.5 text-[18px] font-bold text-black",
           defaultClassNames.caption_label,
         ),
         table: "w-full border-collapse",
@@ -109,13 +105,13 @@ function Calendar({
           defaultClassNames.day,
         ),
         range_start: cn(
-          "rounded-l-md bg-accent",
+          "rounded-l-md bg-(--lightblue)",
           defaultClassNames.range_start,
         ),
         range_middle: cn("rounded-none", defaultClassNames.range_middle),
-        range_end: cn("rounded-r-md bg-accent", defaultClassNames.range_end),
+        range_end: cn("rounded-r-md bg-(--lightblue)", defaultClassNames.range_end),
         today: cn(
-          "rounded-md bg-(--accentgreen) text-white data-[selected=true]:rounded-none",
+          "rounded-md",
           defaultClassNames.today,
         ),
         outside: cn(
@@ -143,21 +139,31 @@ function Calendar({
         Chevron: ({ className, orientation, ...props }) => {
           if (orientation === "left") {
             return (
-              <ChevronLeftIcon className={cn("size-4", className)} {...props} />
+              <ChevronLeftIcon className={cn("size-6", className)} strokeWidth={2.25} {...props} />
             );
           }
 
           if (orientation === "right") {
             return (
               <ChevronRightIcon
-                className={cn("size-4", className)}
+                className={cn("size-6", className)}
+                strokeWidth={2.25}
                 {...props}
               />
             );
           }
 
+          // month/year dropdowns: small corner triangle (Figma)
           return (
-            <ChevronDownIcon className={cn("size-4", className)} {...props} />
+            <svg
+              width="9"
+              height="9"
+              viewBox="0 0 6 6"
+              aria-hidden
+              className={cn("mb-1 self-end", className)}
+            >
+              <path d="M6 0V6H0Z" fill="var(--fundblue)" />
+            </svg>
           );
         },
         DayButton: CalendarDayButton,
@@ -205,8 +211,9 @@ function CalendarDayButton({
       data-range-start={modifiers.range_start}
       data-range-end={modifiers.range_end}
       data-range-middle={modifiers.range_middle}
+      data-today={modifiers.today}
       className={cn(
-        "flex aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-[3px] group-data-[focused=true]/day:ring-ring/50 data-[range-end=true]:rounded-r-md data-[range-end=true]:rounded-l-none data-[range-end=true]:bg-(--fundblue) data-[range-end=true]:text-primary-foreground data-[range-middle=true]:rounded-none data-[range-middle=true]:font-bold data-[range-start=true]:font-bold data-[range-end=true]:font-bold data-[range-middle=true]:bg-(--accentcoolgray-50) data-[range-middle=true]:text-black data-[range-start=true]:rounded-l-md data-[range-start=true]:rounded-r-none data-[range-start=true]:bg-(--fundblue) data-[range-start=true]:text-primary-foreground data-[selected-single=true]:bg-primary data-[selected-single=true]:text-primary-foreground dark:hover:text-accent-foreground [&>span]:text-xs [&>span]:opacity-70",
+        "flex aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-[3px] group-data-[focused=true]/day:ring-ring/50 data-[range-end=true]:rounded-r-md data-[range-end=true]:rounded-l-none data-[range-end=true]:bg-(--fundblue) data-[range-end=true]:text-primary-foreground data-[range-middle=true]:rounded-none data-[range-middle=true]:font-bold data-[range-start=true]:font-bold data-[range-end=true]:font-bold data-[range-middle=true]:bg-(--lightblue) data-[range-middle=true]:text-(--fundblue) data-[range-start=true]:rounded-l-md data-[range-start=true]:rounded-r-none data-[range-start=true]:bg-(--fundblue) data-[range-start=true]:text-primary-foreground data-[selected-single=true]:bg-(--fundblue) data-[selected-single=true]:text-white data-[today=true]:bg-(--todaygreen)! data-[today=true]:text-white! data-[today=true]:font-bold data-[today=true]:rounded-md! dark:hover:text-accent-foreground [&>span]:text-xs [&>span]:opacity-70",
         defaultClassNames.day,
         className,
       )}
