@@ -78,6 +78,12 @@ const CircleChevron = ({ open }: { open: boolean }) => (
 export const Header = () => {
   const location = useRouterState({ select: (s) => s.location });
 
+  // On white pages the tab shadows smudge into the 4px gaps, so use a thin outline there instead
+  const lightPage = location.pathname === "/team";
+  const tabShadow = "shadow-[2px_2px_8px_0_rgba(0,0,0,0.25)]";
+  const tabOutline = "border border-[#C9D6EA]";
+  const tabEdge = lightPage ? tabOutline : tabShadow;
+
   const state = useContext(AppStateContext);
   const actions = useContext(AppActionsContext);
 
@@ -394,9 +400,14 @@ export const Header = () => {
           <div className="flex items-center w-full h-14.75 text-gray-400 cursor-not-allowed">
             FAQs
           </div>
-          <div className="flex items-center w-full h-14.75 text-gray-400 cursor-not-allowed">
+          <Link
+            to="/team"
+            activeOptions={{ exact: true }}
+            className="flex items-center w-full h-14.75 text-white cursor-pointer"
+            onClick={() => setMenuOptions(false)}
+          >
             Team & Contact us
-          </div>
+          </Link>
         </div>
       </div>
       {location.pathname == "/home" ? (
@@ -491,7 +502,10 @@ export const Header = () => {
         >
           <div className="flex w-full xl:w-auto xl:ml-1 xl:col-start-1 xl:col-end-2">
             <Card
-              className={`relative z-1 shadow-[2px_2px_8px_0_rgba(0,0,0,0.25)] rounded-none p-0 flex flex-col items-center justify-center w-full gap-0 hover:bg-white transition-colors duration-200 ${location.pathname == "/events" ? "bg-white" : "bg-(--accentblue-30)"} border-0`}
+              className={cn(
+                `relative z-1 rounded-none p-0 flex flex-col items-center justify-center w-full gap-0 hover:bg-white transition-colors duration-200 ${location.pathname == "/events" ? "bg-white" : "bg-(--accentblue-30)"} border-0`,
+                tabEdge,
+              )}
             >
               <div className="h-full w-full flex flex-col justify-end">
                 <div className="text-[11px] font-bold text-(--primaryblack-90)">
@@ -677,7 +691,10 @@ export const Header = () => {
             </div>
           ) : null}
           <div
-            className={`relative z-1 xl:ml-1 shadow-[2px_2px_8px_0_rgba(0,0,0,0.25)] w-full xl:w-auto h-14.75 flex col-start-2 row-start-1 border-r ${location.pathname == "/compare" || location.pathname == "/grid" ? "xl:col-start-2 xl:col-end-3" : location.pathname == "/events" ? "xl:col-start-3 xl:col-end-4" : "xl:col-start-2 xl:col-end-3"}`}
+            className={cn(
+              `relative z-1 xl:ml-1 w-full xl:w-auto h-14.75 flex col-start-2 row-start-1 border-r ${location.pathname == "/compare" || location.pathname == "/grid" ? "xl:col-start-2 xl:col-end-3" : location.pathname == "/events" ? "xl:col-start-3 xl:col-end-4" : "xl:col-start-2 xl:col-end-3"}`,
+              tabEdge,
+            )}
           >
             <Card
               className={`shadow-none rounded-none xl:grow p-0 w-full h-full flex flex-col items-center justify-end gap-0 hover:bg-white transition-colors duration-200 ${location.pathname == "/compare" || location.pathname == "/grid" ? "bg-white" : "bg-(--accentblue-30)"} border-0`}
@@ -964,7 +981,12 @@ export const Header = () => {
             className={`overflow-hidden h-0 w-0 xl:h-auto xl:w-full flex justify-start`}
           >
             <div
-              className="flex flex-col items-center justify-center ml-1 xl:z-3 w-18.25 gap-y-1 cursor-pointer bg-white"
+              // outline always (so it reads as a box on white); shadow only on the map pages, like the tabs
+              className={cn(
+                "flex flex-col items-center justify-center ml-1 xl:z-3 w-18.25 gap-y-1 cursor-pointer bg-white",
+                tabOutline,
+                !lightPage && tabShadow,
+              )}
               onClick={() => {
                 actions?.setDataExplainerState(true);
               }}
