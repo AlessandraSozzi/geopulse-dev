@@ -1469,7 +1469,7 @@ function Events() {
           </div>
         </div>
         <div
-          className={`absolute z-2 bottom-65 md:bottom-0 rounded-lg rounded-t-xl md:transition-[right] md:duration-600 md:ease-in-out ${eventPopup == "all events" ? "md:right-0" : "md:-right-100 invisible"} md:visible max-h-full md:h-85/100 w-full md:w-[350px] flex flex-col bg-white cursor-default draggable`}
+          className={`absolute z-2 bottom-65 md:bottom-2 rounded-lg rounded-t-xl md:transition-[right] md:duration-600 md:ease-in-out ${eventPopup == "all events" ? "md:right-2" : "md:-right-100 invisible"} md:visible max-h-full md:h-85/100 w-full md:w-[350px] flex flex-col bg-white cursor-default draggable`}
           style={{
             "--drag-y": `${y}px`,
             touchAction: "none",
