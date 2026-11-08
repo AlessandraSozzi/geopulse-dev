@@ -12,6 +12,8 @@
   /* brand */
   --fundblue: #004c97;
   --lightblue: #cbe3fa; /* light brand blue: inactive tabs, Data Explainer, light surfaces */
+  --lightgray: #dfdfdf; /* unselected buttons and presets (pairs with --lightblue) */
+  --todaygreen: #16c088; /* today's date in calendars */
 
   /* primary */
   --primaryblue-100: #009cde;
@@ -30,8 +32,6 @@
   --accentdarkblue-50: #808eaf;
   --accentwarmgray-20: #e2e0de;
   --accentcoolgray-60: #d0d1d1;
-  --accentcoolgray-50: #d8d9d9;
-  --accentgreen: #78be20; /* calendar */
   --gray: #dadada; /* slider track */
 
   /* event types (markers, filters, badges) and UI highlight */
