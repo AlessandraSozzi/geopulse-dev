@@ -419,11 +419,35 @@ export function buildGridUrl(state: GridState): string | undefined {
     .replace("{measure}", config.gridMeasure?.[measure] ?? measure);
 }
 
+// TEMP placeholders: same for every dataset until real class breaks / sources are provided.
+// Order is low → high.
+const PLACEHOLDER_EXPOSURE_CLASSES = ["<50", "50–250", ">250"];
+const PLACEHOLDER_HAZARD_CLASSES = ["<1 m", "1–2 m", ">2 m"];
+const PLACEHOLDER_SOURCE =
+  "Sources: Aqueduct, WorldPop and IMF staff calculations.";
+
+// grid year → index into timePeriodLabels
+const timeIndex: Record<number, number> = { 1980: 0, 2030: 1, 2050: 2, 2080: 3 };
+
+// drop a trailing unit, e.g. "Population (count)" → "Population"
+const axisLabel = (label: string) => label.replace(/\s*\(.*\)$/, "");
+
+export type GridLegend = {
+  exposure: string;
+  hazard: string;
+  source: string;
+  title: string;
+  subtitle: string;
+  note: string;
+  exposureAxis: string;
+  hazardAxis: string;
+  exposureClasses: string[]; // low → high
+  hazardClasses: string[]; // low → high
+};
+
 // Legend labels for the current selection, with {measure} / {threshold} filled
 // from measureMapper and threshold.group. Undefined = no bivariate legend.
-export function buildGridLegend(
-  state: GridState,
-): { exposure: string; hazard: string; source: string } | undefined {
+export function buildGridLegend(state: GridState): GridLegend | undefined {
   const config = urlObject[state.currentHazard]?.[state.currentExposure];
   const legend = config?.gridLegend;
   if (!legend) return undefined;
@@ -436,10 +460,42 @@ export function buildGridLegend(
         config.threshold?.group[state.currentThreshold.threshold] ?? "",
       );
 
+  const exposure = fill(legend.exposure);
+  const hazard = fill(legend.hazard);
+
+  // e.g. "5-yr return period · Historical" or "5-yr return period · Mid century · Orderly"
+  const threshold = state.currentThreshold.threshold;
+  const years =
+    config.threshold?.type === "RETURN_PERIOD"
+      ? Number(threshold.replace("rp", ""))
+      : NaN;
+  const hasReturnPeriod = Number.isFinite(years) && years > 0;
+
+  const subtitle = [
+    hasReturnPeriod ? `${years}-yr return period` : "",
+    timePeriodLabels[timeIndex[state.currentTime]] ?? "",
+    state.currentTime !== 1980 ? (scenarioMapper[state.currentScenario] ?? "") : "",
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+  const chance = config.threshold?.group[threshold];
+  const note =
+    hasReturnPeriod && chance
+      ? `A ${years}-year flood has about a ${chance} chance of happening in any given year.`
+      : "";
+
   return {
-    exposure: fill(legend.exposure),
-    hazard: fill(legend.hazard),
-    source: legend.source,
+    exposure,
+    hazard,
+    source: PLACEHOLDER_SOURCE,
+    title: `${state.currentHazard} & ${axisLabel(exposure)}`,
+    subtitle,
+    note,
+    exposureAxis: axisLabel(exposure),
+    hazardAxis: axisLabel(hazard),
+    exposureClasses: PLACEHOLDER_EXPOSURE_CLASSES,
+    hazardClasses: PLACEHOLDER_HAZARD_CLASSES,
   };
 }
 
