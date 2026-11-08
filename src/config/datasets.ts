@@ -33,7 +33,7 @@ export const urlObject: Record<
       gridUrl: `${URL_GRIDBASE}/bivar_riverine_population_{scenario}_{time}_{threshold}/ImageServer`,
       gridLegend: {
         exposure: "Population (count)",
-        hazard: "Flood Height (meters)",
+        hazard: "Inundation depth (meters)",
         source: "Sources: Aqueduct; WorldPop.",
       },
       threshold: {
@@ -68,7 +68,7 @@ export const urlObject: Record<
       gridUrl: `${URL_GRIDBASE}/bivar_riverine_buildings_{scenario}_{time}_{threshold}/ImageServer`,
       gridLegend: {
         exposure: "Buildings (count)",
-        hazard: "Flood Height (meters)",
+        hazard: "Inundation depth (meters)",
         source: "Sources: Aqueduct; Global Building Atlas.",
       },
       threshold: {
@@ -103,7 +103,7 @@ export const urlObject: Record<
       gridUrl: `${URL_GRIDBASE}/bivar_riverine_gdp_{scenario}_{time}_{threshold}/ImageServer`,
       gridLegend: {
         exposure: "GDP (USD)",
-        hazard: "Flood Height (meters)",
+        hazard: "Inundation depth (meters)",
         source: "Sources: Aqueduct; Murakami et al. (2021).",
       },
       threshold: {
@@ -138,7 +138,7 @@ export const urlObject: Record<
       gridUrl: `${URL_GRIDBASE}/bivar_riverine_urban_gdp_{scenario}_{time}_{threshold}/ImageServer`,
       gridLegend: {
         exposure: "Urban GDP (USD)",
-        hazard: "Flood Height (meters)",
+        hazard: "Inundation depth (meters)",
         source: "Sources: Aqueduct; Murakami et al. (2021); GHSL.",
       },
       threshold: {
@@ -175,7 +175,7 @@ export const urlObject: Record<
       gridUrl: `${URL_GRIDBASE}/bivar_coastal_population_{scenario}_{time}_{threshold}/ImageServer`,
       gridLegend: {
         exposure: "Population (count)",
-        hazard: "Flood Height (meters)",
+        hazard: "Inundation depth (meters)",
         source: "Sources: Aqueduct; WorldPop.",
       },
       threshold: {
@@ -210,7 +210,7 @@ export const urlObject: Record<
       gridUrl: `${URL_GRIDBASE}/bivar_coastal_buildings_{scenario}_{time}_{threshold}/ImageServer`,
       gridLegend: {
         exposure: "Buildings (count)",
-        hazard: "Flood Height (meters)",
+        hazard: "Inundation depth (meters)",
         source: "Sources: Aqueduct; Global Building Atlas.",
       },
       threshold: {
@@ -245,7 +245,7 @@ export const urlObject: Record<
       gridUrl: `${URL_GRIDBASE}/bivar_coastal_gdp_{scenario}_{time}_{threshold}/ImageServer`,
       gridLegend: {
         exposure: "GDP (USD)",
-        hazard: "Flood Height (meters)",
+        hazard: "Inundation depth (meters)",
         source: "Sources: Aqueduct; Murakami et al. (2021).",
       },
       threshold: {
@@ -280,7 +280,7 @@ export const urlObject: Record<
       gridUrl: `${URL_GRIDBASE}/bivar_coastal_urban_gdp_{scenario}_{time}_{threshold}/ImageServer`,
       gridLegend: {
         exposure: "Urban GDP (USD)",
-        hazard: "Flood Height (meters)",
+        hazard: "Inundation depth (meters)",
         source: "Sources: Aqueduct; Murakami et al. (2021); GHSL.",
       },
       threshold: {
@@ -419,12 +419,55 @@ export function buildGridUrl(state: GridState): string | undefined {
     .replace("{measure}", config.gridMeasure?.[measure] ?? measure);
 }
 
-// TEMP placeholders: same for every dataset until real class breaks / sources are provided.
-// Order is low → high.
-const PLACEHOLDER_EXPOSURE_CLASSES = ["<50", "50–250", ">250"];
-const PLACEHOLDER_HAZARD_CLASSES = ["<1 m", "1–2 m", ">2 m"];
+// TEMP placeholder: same sources line for every dataset until the wording is confirmed.
 const PLACEHOLDER_SOURCE =
   "Sources: Aqueduct, WorldPop and IMF staff calculations.";
+
+// Bivariate grid class breaks: [low/mid boundary, mid/high boundary].
+// Hazard breaks depend only on the hazard, exposure breaks only on the exposure.
+// Values from the "Thresholds by layer" table.
+type ClassBreaks = {
+  breaks: [number, number];
+  unit: string;
+  format?: (n: number) => string; // default: 1,500 style
+};
+
+// $25,000 → "$25K" (full figures don't fit the 64px tick column)
+const money = (n: number) =>
+  "$" + n.toLocaleString("en", { notation: "compact", maximumFractionDigits: 1 });
+
+const gridHazardBreaks: Record<string, ClassBreaks> = {
+  "Coastal Flooding": { breaks: [1, 2], unit: "m" },
+  "Riverine Flooding": { breaks: [0.25, 1], unit: "m" },
+  "Temperature Extremes": { breaks: [10, 90], unit: "days per year" },
+};
+
+// per-measure overrides (keyed by measureMapper name), checked before gridHazardBreaks
+const gridMeasureBreaks: Record<string, ClassBreaks> = {
+  "Tropical Nights": { breaks: [10, 90], unit: "nights per year" },
+};
+
+// TODO: Livestock breaks still to be provided
+const gridExposureBreaks: Record<string, ClassBreaks> = {
+  Population: { breaks: [300, 1500], unit: "people/km²" },
+  Buildings: { breaks: [10, 100], unit: "buildings/km²" },
+  GDP: { breaks: [25000, 250000], unit: "US$ PPP/km²", format: money },
+  "Urban GDP": { breaks: [25000, 250000], unit: "US$ PPP/km²", format: money },
+};
+
+// Tick labels without the unit (it goes in the axis title so labels fit their column):
+// [300, 1500] → ["<300", "300–1,500", "≥1,500"]; no breaks → Low / Medium / High
+const DEFAULT_CLASSES = ["Low", "Medium", "High"];
+const classLabels = (cfg?: ClassBreaks): string[] => {
+  if (!cfg) return DEFAULT_CLASSES;
+  const fmt = cfg.format ?? ((n: number) => n.toLocaleString("en"));
+  const [a, b] = cfg.breaks.map(fmt);
+  return [`<${a}`, `${a}–${b}`, `≥${b}`];
+};
+
+// axis title with unit: "Inundation depth" + "m" → "Inundation depth (m)"
+const withUnit = (label: string, cfg?: ClassBreaks) =>
+  cfg?.unit ? `${label} (${cfg.unit})` : label;
 
 // grid year → index into timePeriodLabels
 const timeIndex: Record<number, number> = { 1980: 0, 2030: 1, 2050: 2, 2080: 3 };
@@ -462,6 +505,10 @@ export function buildGridLegend(state: GridState): GridLegend | undefined {
 
   const exposure = fill(legend.exposure);
   const hazard = fill(legend.hazard);
+  const hazardCfg =
+    gridMeasureBreaks[measureMapper[state.currentMeasure.id]] ??
+    gridHazardBreaks[state.currentHazard];
+  const exposureCfg = gridExposureBreaks[state.currentExposure];
 
   // e.g. "5-yr return period · Historical" or "5-yr return period · Mid century · Orderly"
   const threshold = state.currentThreshold.threshold;
@@ -492,10 +539,10 @@ export function buildGridLegend(state: GridState): GridLegend | undefined {
     title: `${state.currentHazard} & ${axisLabel(exposure)}`,
     subtitle,
     note,
-    exposureAxis: axisLabel(exposure),
-    hazardAxis: axisLabel(hazard),
-    exposureClasses: PLACEHOLDER_EXPOSURE_CLASSES,
-    hazardClasses: PLACEHOLDER_HAZARD_CLASSES,
+    exposureAxis: withUnit(axisLabel(exposure), exposureCfg),
+    hazardAxis: withUnit(axisLabel(hazard), hazardCfg),
+    exposureClasses: classLabels(exposureCfg),
+    hazardClasses: classLabels(hazardCfg),
   };
 }
 

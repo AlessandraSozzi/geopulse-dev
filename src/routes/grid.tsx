@@ -132,46 +132,6 @@ function GridView() {
     }
   };
 
-  // new green
-  // var colors: Record<string, { field: number, colorValue: string }> = {
-  //   "High Population & High Flood Height": {
-  //     field: 9,
-  //     colorValue: "rgb(153, 252, 133)"
-  //   },
-  //   "High Population & Medium Flood Height": {
-  //     field: 8,
-  //     colorValue: "rgb(79, 142, 171)"
-  //   },
-  //   "High Population & Low Flood Height": {
-  //     field: 7,
-  //     colorValue: "rgb(50, 109, 241)"
-  //   },
-  //   "Medium Population & High Flood Height": {
-  //     field: 6,
-  //     colorValue: "rgb(140, 215, 90)"
-  //   },
-  //   "Medium Population & Medium Flood ": {
-  //     field: 5,
-  //     colorValue: "rgb(71, 119, 138)"
-  //   },
-  //   "Medium Population & Low Flood Height": {
-  //     field: 4,
-  //     colorValue: "rgb(37, 75, 157)"
-  //   },
-  //   "Low Population & High Flood Height": {
-  //     field: 3,
-  //     colorValue: "rgb(122, 165, 50)"
-  //   },
-  //   "Low Population & Medium Flood Height": {
-  //     field: 2,
-  //     colorValue: "rgb(70, 110, 50)"
-  //   },
-  //   "Low Population & Low Flood Height": {
-  //     field: 1,
-  //     colorValue: "rgb(31, 77, 87)"
-  //   }
-  // };
-
   var valuesArray = [
     {
       value: 1,
@@ -253,11 +213,18 @@ function GridView() {
 
   // tooltip text for a legend cell, e.g. "High Population" / "Low Flood"
   const levels = ["Low", "Medium", "High"];
-  const hazardShort = legend ? legend.hazardAxis.replace(/\s*height$/i, "") : "";
+  const dropUnit = (label: string) => label.replace(/\s*\(.*\)$/, ""); // "Inundation depth (m)" → "Inundation depth"
+  const exposureShort = legend ? dropUnit(legend.exposureAxis) : "";
+  // flood axis "Inundation depth" reads as "Flood" in the tooltip ("Low Flood")
+  const hazardShort = legend
+    ? dropUnit(legend.hazardAxis)
+        .replace(/^inundation depth$/i, "Flood")
+        .replace(/\s*height$/i, "")
+    : "";
   const tooltipLines = (field: number) =>
     legend
       ? [
-          `${levels[Math.floor((field - 1) / 3)]} ${legend.exposureAxis}`,
+          `${levels[Math.floor((field - 1) / 3)]} ${exposureShort}`,
           `${levels[(field - 1) % 3]} ${hazardShort}`,
         ]
       : ["", ""];
@@ -344,21 +311,22 @@ function GridView() {
       <div className="w-full h-full bg-[#1D2224] " ref={ref}></div>
       <Thresholds />
       {legend && (
-      <div className="absolute bottom-2 left-2 w-64 rounded-lg border border-[#2A3B5F] bg-[#1B1B1D] p-3.5 text-white shadow-lg">
+      <div className="absolute bottom-2 left-2 w-66 rounded-lg border border-[#2A3B5F] bg-[#1B1B1D] p-3.5 text-left text-white shadow-lg">
         <h3 className="text-[12px] font-bold uppercase leading-tight tracking-wide">{legend.title}</h3>
         <p className="mt-0.5 text-[11px] text-[#8E8E93]">{legend.subtitle}</p>
 
         <div id="newLegend" className="mt-3 grid grid-cols-[auto_auto_auto] justify-start gap-x-2">
           {/* y axis: label + arrow */}
-          <div className="flex items-stretch gap-1">
-            <span className="rotate-180 text-center text-[11px] text-[#A97CF2] [writing-mode:vertical-rl]">{legend.exposureAxis}</span>
+          {/* fixed 112px tall (= matrix) so long titles wrap instead of stretching the row; fixed width so the matrix never shifts */}
+          <div className="flex h-28 w-10 shrink-0 items-stretch justify-end gap-1">
+            <span className="rotate-180 text-center text-[11px] leading-tight text-[#A97CF2] [writing-mode:vertical-rl]">{legend.exposureAxis}</span>
             <svg width="8" className="h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 8 112">
               <path d="M4 112V2M1 6l3-4 3 4" stroke="#A97CF2" strokeWidth="1.5" fill="none" />
             </svg>
           </div>
 
-          {/* y ticks (high → low) */}
-          <div className="flex flex-col gap-0.5">
+          {/* y ticks (high → low), fixed width so the matrix never shifts */}
+          <div className="flex w-16 shrink-0 flex-col gap-0.5">
             {[2, 1, 0].map((i) => (
               <span key={i} className="flex h-9 items-center justify-end whitespace-nowrap text-[11px]" style={{ color: yTickColors[i] }}>
                 {legend.exposureClasses[i]}
@@ -367,7 +335,8 @@ function GridView() {
           </div>
 
           {/* matrix */}
-          <div className="grid w-28 grid-cols-3 gap-0.5">
+          {/* rows locked to 36px so vertical gaps always equal horizontal ones (2px) */}
+          <div className="grid w-28 grid-cols-3 grid-rows-[repeat(3,36px)] gap-0.5 self-start">
             {cellOrder.map((field, i) => {
               const active = activeField === field;
               const [line1, line2] = tooltipLines(field);
@@ -405,9 +374,16 @@ function GridView() {
           </div>
 
           {/* x ticks, arrow, label (under the matrix only) */}
-          <div className="col-start-3 mt-1.5 grid w-28 grid-cols-3 gap-0.5 text-center text-[11px]">
+          <div className="col-start-3 mt-1.5 grid w-28 grid-cols-3 gap-0.5 text-[11px]">
             {legend.hazardClasses.map((c, i) => (
-              <span key={c} className="whitespace-nowrap" style={{ color: xTickColors[i] }}>{c}</span>
+              <span
+                key={c}
+                // outer labels hug the matrix edges, middle stays centred
+                className={cn("whitespace-nowrap", i === 0 ? "text-left" : i === 2 ? "text-right" : "text-center")}
+                style={{ color: xTickColors[i] }}
+              >
+                {c}
+              </span>
             ))}
           </div>
           <svg className="col-start-3 mt-1 w-28 overflow-visible" height="8" viewBox="0 0 112 8">
@@ -421,9 +397,9 @@ function GridView() {
         </p>
       </div>
       )}
-      {/* left = 8px inset + 256px legend + 8px gap */}
+      {/* left = 8px inset + 264px legend + 8px gap */}
       <arcgis-scale-bar
-        className="calcite-mode-dark z-2 absolute bottom-[22px] left-[272px] max-w-21"
+        className="calcite-mode-dark z-2 absolute bottom-[22px] left-[280px] max-w-21"
         ref={scaleBarRef}
         bar-style="line"
         unit="metric"
