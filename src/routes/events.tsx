@@ -40,6 +40,7 @@ import GroupLayer from "@arcgis/core/layers/GroupLayer.js";
 import ImageryTileLayer from "@arcgis/core/layers/ImageryTileLayer.js";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer.js";
 import VectorTileLayer from "@arcgis/core/layers/VectorTileLayer.js";
+import { createBasemapLayers } from "@/lib/basemap";
 
 // arcgis map components
 import "@arcgis/map-components/components/arcgis-scale-bar";
@@ -274,18 +275,11 @@ function Events() {
 
   useEffect(() => {
     if (ref.current) {
-      // base layer displaying the regions of the world
-      baseLayer.current = new VectorTileLayer({
-        url: "https://cdn.arcgis.com/sharing/rest/content/items/d7397603e9274052808839b70812be50/resources/styles/root.json",
-        title: "base",
-      });
-
-      // vector tile layer displaying country boundaries
-      boundariesLayer.current = new VectorTileLayer({
-        url: "https://cdn.arcgis.com/sharing/rest/content/items/e8ecee3086f34b06b85229d832a1c14a/resources/styles/root.json",
-        title: "boundaries",
-        opacity: 0.25,
-      });
+      // shared basemap (world map + country boundaries); kept in refs because
+      // the base layer is blurred/greyed when an event is focused
+      const { base, boundaries } = createBasemapLayers();
+      baseLayer.current = base;
+      boundariesLayer.current = boundaries;
 
       // graphics layer that masks-in the event exposures feature layer
       unweightedEventLayer.current = new GraphicsLayer({
