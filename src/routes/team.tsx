@@ -93,6 +93,24 @@ function Team() {
             collaborators and partner institutions around the world.
           </p>
 
+          {/* contact: compact, part of the intro */}
+          <a
+            href={`mailto:${CONTACT_EMAIL}`}
+            className={`${card} group mt-8 flex w-full max-w-110 items-center gap-4 px-5 py-4 transition-colors hover:border-[#234E90]`}
+          >
+            <div className="flex size-12 shrink-0 items-center justify-center rounded-md bg-[#E8EFFA]">
+              <Mail className="size-5.5 text-[#234E90]" strokeWidth={1.5} />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#6B7A90]">
+                Contact us
+              </p>
+              <p className="truncate text-[16px] font-bold text-[#234E90] group-hover:underline">
+                {CONTACT_EMAIL}
+              </p>
+            </div>
+          </a>
+
           <Section
             title="Core team"
             description="The team that builds and maintains GeoPulse."
@@ -155,28 +173,6 @@ function Team() {
                 </div>
               ))}
             </div>
-          </Section>
-
-          <Section
-            title="Contact us"
-            description="Questions, feedback or data requests? Get in touch with the GeoPulse team."
-          >
-            <a
-              href={`mailto:${CONTACT_EMAIL}`}
-              className={`${card} group flex w-full max-w-110 items-center gap-4 px-5 py-4 transition-colors hover:border-[#234E90]`}
-            >
-              <div className="flex size-12 shrink-0 items-center justify-center rounded-md bg-[#E8EFFA]">
-                <Mail className="size-5.5 text-[#234E90]" strokeWidth={1.5} />
-              </div>
-              <div className="min-w-0">
-                <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#6B7A90]">
-                  Email
-                </p>
-                <p className="truncate text-[16px] font-bold text-[#234E90] group-hover:underline">
-                  {CONTACT_EMAIL}
-                </p>
-              </div>
-            </a>
           </Section>
         </main>
       </div>
