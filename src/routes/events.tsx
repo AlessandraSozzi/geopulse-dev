@@ -2026,40 +2026,36 @@ function Events() {
             </div>
           </div>
         </div>
-        <div className="absolute bottom-0 invisible md:visible h-20 w-[350px] bg-[rgba(0,0,0,0.85)] flex flex-col items-center justify-around">
-          <div className="w-8/10 flex flex-col items-center justify-end">
-            <div className="flex text-white w-full font-extrabold tracking-wide text-[12px] pb-[10px]">
-              <div>
-                {realtimeObject[realtimeExposure.exposure].title.toUpperCase()}{" "}
-                {realtimeObject[realtimeExposure.exposure].unit}
-              </div>
-            </div>
+        <div className="absolute bottom-2 left-2 invisible md:visible w-[350px] rounded-lg border border-[#2A3B5F] bg-[#1B1B1D] p-3.5 text-left text-white shadow-lg">
+          <h3 className="text-[12px] font-bold uppercase leading-tight tracking-wide">
+            {realtimeObject[realtimeExposure.exposure].title}
+          </h3>
+          {realtimeObject[realtimeExposure.exposure].unit && (
+            <p className="mt-0.5 text-[11px] text-[#8E8E93]">
+              {realtimeObject[realtimeExposure.exposure].unit}
+            </p>
+          )}
             <div
-              className="h-2 w-full"
+              className="mt-3 h-2 w-full rounded-xs"
               style={{
                 background: `linear-gradient(to right, ${realtimeObject[realtimeExposure.exposure].colorScheme.map((e, i) => "rgba(" + e.symbol.color.join(",") + ") " + (i / realtimeObject[realtimeExposure.exposure].colorScheme.length) * 100 + "%," + " rgba(" + e.symbol.color.join(",") + ") " + ((i + 1) / realtimeObject[realtimeExposure.exposure].colorScheme.length) * 100 + "% ").join(",")})`,
               }}
             ></div>
-            <div className="h-[20px] w-full flex justify-between">
+            <div className="mt-1 flex w-full justify-between">
               {realtimeObject[realtimeExposure.exposure].colorScheme.map(
                 (e, i) => (
-                  <div key={i} className="flex flex-col w-full h-[full]">
-                    <div
-                      style={{ justifyContent: "center" }}
-                      className="flex items-start w-full h-[20px]"
-                    >
-                      <div className="flex justify-end items-start w-full gap-0">
-                        <div className="text-white text-[12px]">{e.label}</div>
-                      </div>
-                    </div>
+                  <div
+                    key={i}
+                    className="flex w-full justify-end text-[11px] text-[#C7C7CC]"
+                  >
+                    {e.label}
                   </div>
                 ),
               )}
             </div>
-          </div>
         </div>
         <arcgis-scale-bar
-          className="calcite-mode-dark z-2 absolute top-30 right-5 md:top-auto md:right-auto md:bottom-1 md:left-90 max-w-21"
+          className="calcite-mode-dark z-2 absolute top-30 right-5 md:top-auto md:right-auto md:bottom-[22px] md:left-[370px] max-w-21"
           ref={scaleBarRef}
           bar-style="line"
           unit="metric"

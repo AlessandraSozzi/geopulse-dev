@@ -7,7 +7,8 @@ import Map from "@arcgis/core/Map.js";
 import MapView from "@arcgis/core/views/MapView.js";
 import UniqueValueRenderer from "@arcgis/core/renderers/UniqueValueRenderer.js";
 
-import ScaleBar from "@arcgis/core/widgets/ScaleBar.js";
+import "@arcgis/map-components/components/arcgis-scale-bar";
+import type {} from "@arcgis/map-components/types/react";
 
 import { buildGridUrl, buildGridLegend } from "@/config/datasets";
 import { Thresholds } from "@/components/thresholds";
@@ -30,6 +31,7 @@ function GridView() {
   const [hoveredField, setHoveredField] = useState<number | null>(null);
 
   const ref = useRef(null);
+  const scaleBarRef = useRef<any>(null);
   let map = useRef<Map | null>(null);
   const vtlayer = useRef<ImageryTileLayer | null>(null);
   var view = useRef<MapView>(new MapView());
@@ -69,14 +71,8 @@ function GridView() {
 
       view.current.ui.components = [];
 
-      const scaleBar = new ScaleBar({
-        view: view.current,
-        unit: "metric", // Options: "metric", "non-metric", or "dual"
-      });
-
-      view.current.ui.add(scaleBar, {
-        position: "bottom-right",
-      });
+      // scale bar sits next to the legend (positioned in JSX)
+      if (scaleBarRef.current) scaleBarRef.current.view = view.current;
 
       reactiveUtils.watch(
         () => [view.current.interacting, view.current.viewpoint],
@@ -425,6 +421,13 @@ function GridView() {
         </p>
       </div>
       )}
+      {/* left = 8px inset + 256px legend + 8px gap */}
+      <arcgis-scale-bar
+        className="calcite-mode-dark z-2 absolute bottom-[22px] left-[272px] max-w-21"
+        ref={scaleBarRef}
+        bar-style="line"
+        unit="metric"
+      ></arcgis-scale-bar>
     </div>
   );
 }
