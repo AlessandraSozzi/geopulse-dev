@@ -61,7 +61,7 @@ function Team() {
   }, []);
 
   return (
-    <ContentPage eyebrow="About GeoPulse" title="Our team">
+    <ContentPage eyebrow="About GeoPulse" title="Our Team">
           <p className="mt-5 max-w-160 text-[16px] leading-relaxed text-[#3D4A5C]">
             GeoPulse is built by a team of economists, data scientists and
             designers, guided by an advisory board and supported by
@@ -87,7 +87,7 @@ function Team() {
           </a>
 
           <Section
-            title="Core team"
+            title="Core Team"
             description="The team that builds and maintains GeoPulse."
           >
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -110,7 +110,7 @@ function Team() {
           </Section>
 
           <Section
-            title="Advisory board"
+            title="Advisory Board"
             description="Experts who guide the direction of the GeoPulse project."
           >
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -132,7 +132,7 @@ function Team() {
           </Section>
 
           <Section
-            title="Supporting institutions"
+            title="Supporting Institutions"
             description="We gratefully acknowledge the support of these institutions."
           >
             <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-5">
