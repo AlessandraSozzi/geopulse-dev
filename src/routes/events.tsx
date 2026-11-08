@@ -4,7 +4,14 @@ import { z } from "zod";
 
 // react hooks holding state, context, and references
 import { AppStateContext, AppActionsContext } from "../app";
-import { useState, useRef, useEffect, useCallback, useContext } from "react";
+import {
+  useState,
+  useRef,
+  useEffect,
+  useLayoutEffect,
+  useCallback,
+  useContext,
+} from "react";
 
 // this function constructs className strings conditionally and merges tailwindcss classes in javascript
 import { cn } from "@/lib/utils";
@@ -69,6 +76,35 @@ const searchSchema = z.object({
     .catch(0)
     .transform((val) => (val === 0 ? undefined : val)),
 });
+
+// Layer icon for the legend title. The config icons are drawn at different sizes
+// (≈16–21 units), so the viewBox is fitted to each path's own bounds after it renders:
+// every icon fills the same 16px box, centred.
+function LegendIcon({ d }: { d: string }) {
+  const svgRef = useRef<SVGSVGElement>(null);
+  const pathRef = useRef<SVGPathElement>(null);
+  useLayoutEffect(() => {
+    if (!svgRef.current || !pathRef.current) return;
+    const b = pathRef.current.getBBox();
+    if (b.width && b.height) {
+      svgRef.current.setAttribute("viewBox", `${b.x} ${b.y} ${b.width} ${b.height}`);
+    }
+  }, [d]);
+  return (
+    <svg
+      ref={svgRef}
+      width="16"
+      height="16"
+      viewBox="0 0 21 21"
+      fill="currentColor"
+      xmlns="http://www.w3.org/2000/svg"
+      className="shrink-0"
+      aria-hidden
+    >
+      <path ref={pathRef} d={d} />
+    </svg>
+  );
+}
 
 export const Route = createFileRoute("/events")({
   component: Events,
@@ -279,7 +315,7 @@ function Events() {
       // the base layer is blurred/greyed when an event is focused.
       // Hillshade disabled (see basemap.ts). If re-enabled: blur it with the base layer and
       // change the exposure layer's reorder(…, 1) so it stays above the hillshade.
-      const { base, boundaries } = createBasemapLayers();
+      const { base, boundaries, labels } = createBasemapLayers();
       baseLayer.current = base;
       boundariesLayer.current = boundaries;
 
@@ -307,6 +343,7 @@ function Events() {
           // hillshade, (disabled)
           boundariesLayer.current,
           groupLayer.current,
+          labels, // place names on top; event dots (added later) still sit above them
         ],
       });
 
@@ -2024,32 +2061,85 @@ function Events() {
           </div>
         </div>
         <div className="absolute bottom-2 left-2 invisible md:visible w-[350px] rounded-lg border border-[#2A3B5F] bg-[#1B1B1D] p-3.5 text-left text-white shadow-lg">
-          <h3 className="text-[12px] font-bold uppercase leading-tight tracking-wide">
-            {realtimeObject[realtimeExposure.exposure].title}
-          </h3>
-          {realtimeObject[realtimeExposure.exposure].unit && (
-            <p className="mt-0.5 text-[11px] text-[#8E8E93]">
-              {realtimeObject[realtimeExposure.exposure].unit}
-            </p>
-          )}
-            <div
-              className="mt-3 h-2 w-full rounded-xs"
-              style={{
-                background: `linear-gradient(to right, ${realtimeObject[realtimeExposure.exposure].colorScheme.map((e, i) => "rgba(" + e.symbol.color.join(",") + ") " + (i / realtimeObject[realtimeExposure.exposure].colorScheme.length) * 100 + "%," + " rgba(" + e.symbol.color.join(",") + ") " + ((i + 1) / realtimeObject[realtimeExposure.exposure].colorScheme.length) * 100 + "% ").join(",")})`,
-              }}
-            ></div>
-            <div className="mt-1 flex w-full justify-between">
-              {realtimeObject[realtimeExposure.exposure].colorScheme.map(
-                (e, i) => (
-                  <div
-                    key={i}
-                    className="flex w-full justify-end text-[11px] text-[#C7C7CC]"
-                  >
-                    {e.label}
+          {(() => {
+            const exposure = realtimeObject[realtimeExposure.exposure];
+            const isPoints = exposure.legendType === "points";
+            // marker colour from the layer's own colour scheme, so legend and map always match
+            const rgb = exposure.colorScheme[0].symbol.color.slice(0, 3).join(",");
+            return (
+              <>
+                <h3 className="flex items-center gap-2 text-[12px] font-bold uppercase leading-tight tracking-wide">
+                  {exposure.icon && <LegendIcon d={exposure.icon} />}
+                  {exposure.title}
+                </h3>
+                {exposure.unit && (
+                  <p className="mt-0.5 text-[11px] text-[#8E8E93]">
+                    {exposure.unit}
+                  </p>
+                )}
+
+                {isPoints ? (
+                  // point layers: show the symbol itself (one dot per feature)
+                  <div className="mt-3 flex items-center gap-3">
+                    <span
+                      className="size-2.5 shrink-0 rounded-full"
+                      style={{
+                        backgroundColor: `rgb(${rgb})`,
+                        // mimics the bloom effect on the map markers
+                        boxShadow: `0 0 6px 2px rgba(${rgb},0.6)`,
+                      }}
+                    />
+                    <span className="text-[13px] text-white">
+                      {exposure.legendLabel}
+                    </span>
+                    <span className="ml-auto text-[11px] text-[#8E8E93]">
+                      1 dot = 1 {exposure.legendLabel?.toLowerCase()}
+                    </span>
                   </div>
-                ),
-              )}
-            </div>
+                ) : exposure.legendType === "area" ? (
+                  // yes/no category rasters (e.g. cropland): one square swatch, no scale
+                  <div className="mt-3 flex items-center gap-3">
+                    <span
+                      className="size-3 shrink-0 rounded-[2px]"
+                      style={{ backgroundColor: `rgb(${rgb})` }}
+                    />
+                    <span className="text-[13px] text-white">
+                      {exposure.legendLabel}
+                    </span>
+                  </div>
+                ) : (
+                  // continuous raster layers: colour bar with class labels
+                  <>
+                    <div
+                      className="mt-3 h-2 w-full rounded-xs"
+                      style={{
+                        background: `linear-gradient(to right, ${exposure.colorScheme.map((e, i) => "rgba(" + e.symbol.color.join(",") + ") " + (i / exposure.colorScheme.length) * 100 + "%," + " rgba(" + e.symbol.color.join(",") + ") " + ((i + 1) / exposure.colorScheme.length) * 100 + "% ").join(",")})`,
+                      }}
+                    ></div>
+                    {/* break values centred on the boundaries between colour classes
+                        (labels are "< a", b, c, d, "> d": the first n-1, without "<"/">") */}
+                    <div className="relative mt-1 h-5 w-full">
+                      {exposure.colorScheme.slice(0, -1).map((e, i) => {
+                        const left = ((i + 1) / exposure.colorScheme.length) * 100;
+                        return (
+                          <div
+                            key={i}
+                            className="absolute top-0 flex -translate-x-1/2 flex-col items-center"
+                            style={{ left: `${left}%` }}
+                          >
+                            <span className="h-1 w-px bg-[#8E8E93]" />
+                            <span className="mt-0.5 whitespace-nowrap text-[11px] text-[#C7C7CC]">
+                              {String(e.label).replace(/^[<>]\s*/, "")}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+              </>
+            );
+          })()}
         </div>
         <arcgis-scale-bar
           className="calcite-mode-dark z-2 absolute top-30 right-5 md:top-auto md:right-auto md:bottom-[22px] md:left-[370px] max-w-21"
