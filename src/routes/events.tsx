@@ -249,7 +249,7 @@ function Events() {
         })
         .catch((error) => {
           console.log(error);
-          runQuery();
+          // runQuery(); // retry disabled: retrying with no delay flooded the server with "Too many requests"
         });
     }
 
@@ -844,7 +844,7 @@ function Events() {
         })
         .catch((error) => {
           console.log(error);
-          runQuery();
+          // runQuery(); // retry disabled: retrying with no delay flooded the server with "Too many requests"
         });
     }
     runQuery();
@@ -975,7 +975,7 @@ function Events() {
         })
         .catch((error) => {
           console.log(error);
-          runQuery();
+          // runQuery(); // retry disabled: retrying with no delay flooded the server with "Too many requests"
         });
     }
 

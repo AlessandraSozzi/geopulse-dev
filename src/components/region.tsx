@@ -303,7 +303,7 @@ export const Region = ({
       if (page.error) {
         if (attempts <= 10) {
           // reduce interval by last incrememt of for loop if error occurs server-side
-          start = start - maxRecordsPerQuery;
+          // start = start - maxRecordsPerQuery; // retry disabled: attempts resets each loop, so this retried endlessly with no delay
           console.log(
             "Unable to perform query. Sending request again.",
             page.error,
