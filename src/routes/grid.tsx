@@ -14,6 +14,7 @@ import { buildGridUrl, buildGridLegend } from "@/config/datasets";
 import { Thresholds } from "@/components/thresholds";
 import { cn } from "@/lib/utils";
 import { createBasemapLayers } from "@/lib/basemap";
+import type VectorTileLayer from "@arcgis/core/layers/VectorTileLayer.js";
 import ImageryTileLayer from "@arcgis/core/layers/ImageryTileLayer";
 
 export const Route = createFileRoute("/grid")({
@@ -34,14 +35,16 @@ function GridView() {
   const scaleBarRef = useRef<any>(null);
   let map = useRef<Map | null>(null);
   const vtlayer = useRef<ImageryTileLayer | null>(null);
+  const labelsLayer = useRef<VectorTileLayer | null>(null);
   var view = useRef<MapView>(new MapView());
 
   useEffect(() => {
     if (ref.current) {
       // shared basemap, same as the real-time view
-      const { base, boundaries } = createBasemapLayers(); // hillshade disabled, see basemap.ts
+      const { base, boundaries, labels } = createBasemapLayers(); // hillshade disabled, see basemap.ts
+      labelsLayer.current = labels;
       map.current = new Map({
-        layers: [base, /* hillshade, */ boundaries],
+        layers: [base, /* hillshade, */ boundaries, labels],
       });
 
       view.current = new MapView({
@@ -292,7 +295,11 @@ function GridView() {
           uniqueValueInfos: isolatedValues,
         }),
       });
-      map.current.add(vtlayer.current);
+      // insert below the place-name labels so names stay readable on top of the data
+      const labelsIndex = labelsLayer.current
+        ? map.current.layers.indexOf(labelsLayer.current)
+        : -1;
+      map.current.add(vtlayer.current, labelsIndex >= 0 ? labelsIndex : undefined);
     }
   }
 
