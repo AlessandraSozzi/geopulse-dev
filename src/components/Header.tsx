@@ -469,9 +469,9 @@ export const Header = () => {
         <div
           className={`w-full xl:h-14.75 grid grid-cols-[1fr_1fr_50px] ${location.pathname === "/compare" || location.pathname === "/grid" ? "xl:grid-cols-[180px_300px_600px_1fr]" : location.pathname == "/events" ? "xl:grid-cols-[180px_600px_245px_1fr]" : "xl:grid-cols-[180px_360px_1fr]"}  xl:col-start-2 xl:col-end-3`}
         >
-          <div className="flex w-full xl:col-start-1 xl:col-end-2">
+          <div className="flex w-full xl:w-auto xl:ml-1 xl:col-start-1 xl:col-end-2">
             <Card
-              className={`rounded-none p-0 flex flex-col items-center justify-center w-full gap-0 hover:bg-white transition-colors duration-200 ${location.pathname == "/events" ? "bg-white" : "bg-(--accentblue-30)"} border-0`}
+              className={`relative z-1 shadow-[2px_2px_8px_0_rgba(0,0,0,0.25)] rounded-none p-0 flex flex-col items-center justify-center w-full gap-0 hover:bg-white transition-colors duration-200 ${location.pathname == "/events" ? "bg-white" : "bg-(--accentblue-30)"} border-0`}
             >
               <div className="h-full w-full flex flex-col justify-end">
                 <div className="text-[11px] font-bold text-(--primaryblack-90)">
@@ -663,7 +663,7 @@ export const Header = () => {
             </div>
           ) : null}
           <div
-            className={`shadow-[0_1px_3px_0_rgb(0_0_0/0.1),0_1px_2px_-1px_rgb(0_0_0/0.1)] w-full h-14.75 flex col-start-2 row-start-1 border-r ${location.pathname == "/compare" || location.pathname == "/grid" ? "xl:col-start-2 xl:col-end-3" : location.pathname == "/events" ? "xl:col-start-3 xl:col-end-4" : "xl:col-start-2 xl:col-end-3"}`}
+            className={`relative z-1 xl:ml-1 shadow-[2px_2px_8px_0_rgba(0,0,0,0.25)] w-full xl:w-auto h-14.75 flex col-start-2 row-start-1 border-r ${location.pathname == "/compare" || location.pathname == "/grid" ? "xl:col-start-2 xl:col-end-3" : location.pathname == "/events" ? "xl:col-start-3 xl:col-end-4" : "xl:col-start-2 xl:col-end-3"}`}
           >
             <Card
               className={`shadow-none rounded-none xl:grow p-0 w-full h-full flex flex-col items-center justify-end gap-0 hover:bg-white transition-colors duration-200 ${location.pathname == "/compare" || location.pathname == "/grid" ? "bg-white" : "bg-(--accentblue-30)"} border-0`}
@@ -758,7 +758,7 @@ export const Header = () => {
           </div>
           {location.pathname === "/compare" || location.pathname === "/grid" ? (
             <div
-              className={`flex flex-col xl:flex-row xl:w-auto ${dataOptions ? "h-full" : "h-0"} xl:h-14.75 overflow-hidden w-full col-start-1 col-end-4 xl:col-start-3 xl:col-end-4 `}
+              className={`isolate flex flex-col xl:flex-row xl:w-auto ${dataOptions ? "h-full" : "h-0"} xl:h-14.75 overflow-hidden w-full col-start-1 col-end-4 xl:col-start-3 xl:col-end-4 `}
             >
               <Card
                 id="hazardExposure"
@@ -983,7 +983,7 @@ export const Header = () => {
             className={`overflow-hidden h-0 w-0 xl:h-auto xl:w-full flex justify-start`}
           >
             <div
-              className="flex flex-col items-center justify-center ml-2 xl:z-3 w-18.25 gap-y-1 cursor-pointer bg-white"
+              className="flex flex-col items-center justify-center ml-1 xl:z-3 w-18.25 gap-y-1 cursor-pointer bg-white"
               onClick={() => {
                 actions?.setDataExplainerState(true);
               }}
