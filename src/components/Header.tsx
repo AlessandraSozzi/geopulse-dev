@@ -195,7 +195,7 @@ export const Header = () => {
           onOpenChange={() => setCalendarOpened(!calendarOpened)}
         >
           <PopoverTrigger asChild>
-            <div className="flex flex-row items-center w-95/100 h-full xl:h-14.75 justify-between cursor-pointer">
+            <button type="button" className="flex flex-row items-center w-95/100 h-full xl:h-14.75 justify-between cursor-pointer text-left outline-none underline-offset-4 focus-visible:underline">
               <div className="flex w-full justify-between items-center pl-2">
                 <div className="flex gap-x-3 items-center">
                   <section className="font-bold text-[14px]">
@@ -216,7 +216,7 @@ export const Header = () => {
                 </div>
                 <CircleChevron open={calendarOpened} />
               </div>
-            </div>
+            </button>
           </PopoverTrigger>
           <PopoverContent className="w-auto max-h-133.75 overflow-scroll p-0 my-2.5 rounded-none flex flex-col items-center">
             <div className="w-9/10 flex flex-wrap py-5 justify-start md:justify-center gap-2">
@@ -340,14 +340,16 @@ export const Header = () => {
       <div
         className={`${location.pathname == "/home" ? "ml-8" : ""} flex flex-col ${menuOptions ? "z-2 " : "-z-10 h-0 overflow-hidden"} ${location.pathname == "/home" ? "w-71" : "w-full xl:w-50"} bg-(--accentdarkblue-90) xl:bg-[unset] absolute shadow-xl/40`}
       >
-        <div
-          className={`flex w-16.75 ${location.pathname == "/home" ? "h-16" : "h-14.75"} justify-center items-center bg-(--accentdarkblue-90) cursor-pointer`}
+        <button
+          type="button"
+          aria-label="Close menu"
+          className={`flex w-16.75 ${location.pathname == "/home" ? "h-16" : "h-14.75"} justify-center items-center bg-(--accentdarkblue-90) cursor-pointer outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#234E90]`}
           onClick={() => setMenuOptions(!menuOptions)}
         >
           <div className="flex items-center flex-center">
             <CloseIcon color="white" />
           </div>
-        </div>
+        </button>
         <div className="pl-7 bg-(--accentdarkblue-90)">
           <Link
             to="/about"
@@ -368,12 +370,13 @@ export const Header = () => {
           {state?.currentView == "Event tracking" ||
           state?.currentView == "Compare" ||
           state?.currentView == "Grid" ? (
-            <div
-              className="flex items-center w-full h-14.75 text-white cursor-pointer"
+            <button
+              type="button"
+              className="flex items-center w-full h-14.75 text-white cursor-pointer text-left outline-none underline-offset-4 focus-visible:underline"
               onClick={() => actions?.setDataExplainerState(true)}
             >
               Data Explainer
-            </div>
+            </button>
           ) : null}
           <div className="flex items-center w-full h-14.75 text-gray-400 cursor-not-allowed">
             FAQs
@@ -391,8 +394,10 @@ export const Header = () => {
       {location.pathname == "/home" ? (
         <div className="ml-8 flex">
           <div className={`flex h-16 shadow-[0_4px_10.4px_0_rgba(0,0,0,0.50)]`}>
-            <div
-              className="flex cursor-pointer"
+            <button
+              type="button"
+              aria-label="Open menu"
+              className="flex cursor-pointer outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#234E90]"
               onClick={() => setMenuOptions(!menuOptions)}
             >
               <div className="flex h-16 w-full">
@@ -403,7 +408,7 @@ export const Header = () => {
                   </div>
                 </div>
               </div>
-            </div>
+            </button>
           </div>
           <Link
             to="/home"
@@ -417,8 +422,10 @@ export const Header = () => {
         <div
           className={`flex w-full xl:w-50 justify-between xl:justify-start bg-(--fundblue) ${dataOptions ? "h-0" : "h-14.75"} overflow-hidden xl:h-14.75`}
         >
-          <div
-            className="flex cursor-pointer"
+          <button
+            type="button"
+            aria-label="Open menu"
+            className="flex cursor-pointer outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#234E90]"
             onClick={() => setMenuOptions(!menuOptions)}
           >
             <div className="flex h-14.75 w-35 lg:w-auto">
@@ -429,7 +436,7 @@ export const Header = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </button>
           <Link
             to="/home"
             activeOptions={{ exact: true }}
@@ -440,15 +447,16 @@ export const Header = () => {
           <div
             className={`flex items-center w-35 xl:w-0 xl:h-0 overflow-hidden justify-center cursor-pointer bg-(--fundblue) rounded-none border-0 border-none`}
           >
-            <div
-              className="h-7/10 flex w-9/10 items-center justify-evenly rounded-lg bg-(--accentblue-30)"
+            <button
+              type="button"
+              className="h-7/10 flex w-9/10 items-center justify-evenly rounded-lg bg-(--accentblue-30) cursor-pointer outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#234E90]"
               onClick={() => setDataOptions(true)}
             >
               <DataOptionsIcon />
               <div className="text-[12px] text-left font-bold w-15 h-7.5 leading-3.75 text-(--accentdarkblue-100)">
                 DATA OPTIONS
               </div>
-            </div>
+            </button>
           </div>
         </div>
       )}
@@ -482,13 +490,13 @@ export const Header = () => {
                 <Link
                   to="/events"
                   activeOptions={{ exact: true }}
-                  className="flex flex-row h-[35px] items-center justify-center cursor-pointer"
+                  className="group flex flex-row h-[35px] items-center justify-center cursor-pointer outline-none"
                 >
                   <EventTrackingIcon
                     color={location.pathname == "/events" ? "var(--orange)" : "black"}
                   />
                   <div
-                    className={`text-sm font-bold text-end flex items-center pl-1 ${location.pathname == "/events" ? "text-(--orange)" : "text-black"}`}
+                    className={`text-sm font-bold text-end flex items-center pl-1 underline-offset-4 group-focus-visible:underline ${location.pathname == "/events" ? "text-(--orange)" : "text-black"}`}
                   >
                     Event Tracking
                   </div>
@@ -510,12 +518,12 @@ export const Header = () => {
                   onOpenChange={() => setEventFilterOpened(!eventFilterOpened)}
                 >
                   <PopoverTrigger asChild>
-                    <div className="flex flex-row items-center w-95/100 h-full justify-between cursor-pointer">
+                    <button type="button" className="flex flex-row items-center w-95/100 h-full justify-between cursor-pointer text-left outline-none underline-offset-4 focus-visible:underline">
                       <div className="text-[14px] font-bold text-end flex items-center pl-2">
                         {eventTypes[state?.eventFilter].type}
                       </div>
                       <CircleChevron open={eventFilterOpened} />
-                    </div>
+                    </button>
                   </PopoverTrigger>
                   <PopoverContent className="w-56.25 p-0 py-2 my-1.25 rounded-none shadow-[0_-10px_10px_-5px_rgba(0,0,0,0.1)]">
                     <div
@@ -646,12 +654,12 @@ export const Header = () => {
                   <Link
                     to="/compare"
                     activeOptions={{ exact: true }}
-                    className="flex flex-col justify-end cursor-pointer w-full"
+                    className="group flex flex-col justify-end cursor-pointer w-full outline-none"
                   >
                     <div className="flex flex-row h-8.75 items-center justify-center">
                       <CompareIcon color={location.pathname === "/compare" ? "var(--orange)" : "black"} />
                       <div
-                        className={`text-sm ${location.pathname === "/compare" ? "text-(--orange)" : "text-black"} font-bold text-end flex items-center pr-0.5 pl-1`}
+                        className={`text-sm ${location.pathname === "/compare" ? "text-(--orange)" : "text-black"} font-bold text-end flex items-center pr-0.5 pl-1 underline-offset-4 group-focus-visible:underline`}
                       >
                         Compare
                       </div>
@@ -668,12 +676,12 @@ export const Header = () => {
                   <Link
                     to="/grid"
                     activeOptions={{ exact: true }}
-                    className="flex flex-col justify-end cursor-pointer w-full"
+                    className="group flex flex-col justify-end cursor-pointer w-full outline-none"
                   >
                     <div className="flex flex-row h-8.75 items-center justify-center">
                       <GridIcon color={location.pathname === "/grid" ? "var(--orange)" : "black"} />
                       <div
-                        className={`text-sm ${location.pathname === "/grid" ? "text-(--orange)" : "text-black"} font-bold text-end flex items-center pl-1 pr-0.5`}
+                        className={`text-sm ${location.pathname === "/grid" ? "text-(--orange)" : "text-black"} font-bold text-end flex items-center pl-1 pr-0.5 underline-offset-4 group-focus-visible:underline`}
                       >
                         Grid
                       </div>
@@ -686,14 +694,16 @@ export const Header = () => {
               </div>
             </Card>
           </div>
-          <div
-            className="bg-(--accentblue-30) hover:bg-white w-full h-full col-start-3 row-start-1 flex justify-center items-center cursor-pointer xl:h-0 xl:w-0 xl:hidden"
+          <button
+            type="button"
+            aria-label="Close data options"
+            className="bg-(--accentblue-30) hover:bg-white w-full h-full col-start-3 row-start-1 flex justify-center items-center cursor-pointer xl:h-0 xl:w-0 xl:hidden outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#234E90]"
             onClick={() => setDataOptions(false)}
           >
             <div className=" flex items-center flex-center">
               <CloseIcon color="black" />
             </div>
-          </div>
+          </button>
           {location.pathname === "/compare" || location.pathname === "/grid" ? (
             <div
               className={`isolate flex flex-col xl:flex-row xl:w-auto ${dataOptions ? "h-full" : "h-0"} xl:h-14.75 overflow-hidden w-full col-start-1 col-end-4 xl:col-start-3 xl:col-end-4 `}
@@ -705,7 +715,7 @@ export const Header = () => {
                 <div className="w-95/100 border-b-2">
                   <Popover open={riskOpened} onOpenChange={handleOpenChange}>
                     <PopoverTrigger asChild>
-                      <div className="flex flex-row items-center justify-between w-95/100 h-14.75">
+                      <button type="button" className="flex flex-row items-center justify-between w-95/100 h-14.75 text-left outline-none underline-offset-4 focus-visible:underline">
                         <div className="flex items-center justify-start cursor-pointer">
                           <HazardIcon />
                           <div className="flex flex-col items-start pl-2">
@@ -719,7 +729,7 @@ export const Header = () => {
                           </div>
                         </div>
                         <CircleChevron open={riskOpened} />
-                      </div>
+                      </button>
                     </PopoverTrigger>
                     <PopoverContent className="w-75 p-0 py-5 my-1.25 rounded-none shadow-[0_-10px_10px_-5px_rgba(0,0,0,0.1)]">
                       <div className="mx-3">
@@ -814,7 +824,7 @@ export const Header = () => {
                     onOpenChange={() => setScenarioOpened(!scenarioOpened)}
                   >
                     <PopoverTrigger asChild>
-                      <div className="flex flex-row items-center w-full h-14.75 justify-around cursor-pointer">
+                      <button type="button" className="flex flex-row items-center w-full h-14.75 justify-around cursor-pointer text-left outline-none underline-offset-4 focus-visible:underline">
                         <div className="flex h-full items-center">
                           <div
                             className="border-[#9B9B9B] border h-5/10"
@@ -825,7 +835,7 @@ export const Header = () => {
                           </div>
                         </div>
                         <CircleChevron open={scenarioOpened} />
-                      </div>
+                      </button>
                     </PopoverTrigger>
                     <PopoverContent className="w-56.25 p-0 my-1.25 rounded-none shadow-[0_-10px_10px_-5px_rgba(0,0,0,0.1)]">
                       <div
@@ -860,10 +870,12 @@ export const Header = () => {
           <div
             className={`overflow-hidden h-0 w-0 xl:h-auto xl:w-full flex justify-start`}
           >
-            <div
+            <button
+              type="button"
               // outline always (so it reads as a box on white); shadow only on the map pages, like the tabs
+              // keyboard focus underlines the label (parent is overflow-hidden, so an outline would be clipped)
               className={cn(
-                "flex flex-col items-center justify-center ml-1 xl:z-3 w-18.25 gap-y-1 cursor-pointer bg-white",
+                "group flex flex-col items-center justify-center ml-1 xl:z-3 w-18.25 gap-y-1 cursor-pointer bg-white outline-none",
                 tabOutline,
                 !lightPage && tabShadow,
               )}
@@ -872,10 +884,10 @@ export const Header = () => {
               }}
             >
               <img src={DataIcon} width={15}></img>
-              <span className="font-bold text-black text-xs text-base/5">
+              <span className="font-bold text-black text-xs text-base/5 underline-offset-4 group-focus-visible:underline">
                 Data Explainer
               </span>
-            </div>
+            </button>
           </div>
         </div>
       )}
