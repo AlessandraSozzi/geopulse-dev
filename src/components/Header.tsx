@@ -63,6 +63,57 @@ import {
 } from "../assets/NavIcons";
 
 
+// Single-choice dropdown list used by the event-type and scenario dropdowns.
+// Same pattern as the country dropdown: light-grey row on hover / keyboard focus,
+// ✓ + bold on the selected option. ↑/↓ (Home/End) move focus, Enter/Space selects.
+type Option<T extends string> = { value: T; label: React.ReactNode; icon?: React.ReactNode };
+
+function OptionList<T extends string>({
+  label,
+  options,
+  value,
+  onSelect,
+}: {
+  label: string;
+  options: Option<T>[];
+  value: T;
+  onSelect: (v: T) => void;
+}) {
+  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(e.key)) return;
+    e.preventDefault();
+    const items = Array.from(e.currentTarget.querySelectorAll<HTMLButtonElement>('[role="option"]'));
+    const i = items.indexOf(document.activeElement as HTMLButtonElement);
+    const next =
+      e.key === "Home" ? 0
+      : e.key === "End" ? items.length - 1
+      : (i + (e.key === "ArrowDown" ? 1 : -1) + items.length) % items.length;
+    items[next]?.focus();
+  };
+  return (
+    <div role="listbox" aria-label={label} className="flex flex-col gap-0.5 p-1.5" onKeyDown={onKeyDown}>
+      {options.map((o) => {
+        const selected = o.value === value;
+        return (
+          <button
+            key={o.value}
+            type="button"
+            role="option"
+            aria-selected={selected}
+            tabIndex={selected ? 0 : -1}
+            onClick={() => onSelect(o.value)}
+            className={`flex w-full cursor-pointer items-center gap-3 rounded-md px-2.5 py-2.5 text-left text-[14px] text-black outline-none transition-colors hover:bg-neutral-200 focus-visible:bg-neutral-200 ${selected ? "font-bold" : ""}`}
+          >
+            {o.icon}
+            <span className="flex-1">{o.label}</span>
+            <Check className={`size-4 shrink-0 ${selected ? "opacity-100" : "opacity-0"}`} aria-hidden />
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export const Header = () => {
   const location = useRouterState({ select: (s) => s.location });
 
@@ -530,7 +581,7 @@ export const Header = () => {
               <Card className="rounded-none border-r-0 p-0 flex flex-col items-center justify-center gap-0 h-22 xl:h-14.75 w-full px-2">
                 <Popover
                   open={eventFilterOpened}
-                  onOpenChange={() => setEventFilterOpened(!eventFilterOpened)}
+                  onOpenChange={setEventFilterOpened}
                 >
                   <PopoverTrigger asChild>
                     <button type="button" className="flex flex-row items-center w-95/100 h-full justify-between cursor-pointer text-left outline-none underline-offset-4 focus-visible:underline">
@@ -540,36 +591,21 @@ export const Header = () => {
                       <CircleChevron open={eventFilterOpened} />
                     </button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-56.25 p-0 py-2 my-1.25 rounded-none shadow-[0_-10px_10px_-5px_rgba(0,0,0,0.1)]">
-                    <div
-                      className={`flex flex-row justify-center h-[calc(80px*${urlObject[state?.currentHazard][state?.currentExposure].scenarios.length})]`}
-                    >
-                      <ItemGroup>
-                        {Object.entries(eventTypes).map(([x, y]) => (
-                          <div className="flex items-center">
-                            {/* <div
-                              className="flex justify-center border-1 rounded-full w-4 h-4"
-                              style={{ borderColor: eventTypes[x].color }}
-                            >
-                              <div className="flex items-center justify-center">
-                                <div
-                                  className="rounded-sm w-1.75 h-1.75"
-                                  style={{ background: eventTypes[x].color }}
-                                ></div>
-                              </div>
-                            </div> */}
-                            <EventTypeIcon color={eventTypes[x].color} />
-                            <Item
-                              key={x}
-                              className={`cursor-pointer py-3 ${eventTypes[state?.eventFilter].type === eventTypes[x].type ? "font-bold text-(--orange) underline underline-offset-1.25 decoration-0.5" : ""} transition-all duration-200 ease-in`}
-                              onClick={() => actions?.setEventFilter(x)}
-                            >
-                              {eventTypes[x].type}
-                            </Item>
-                          </div>
-                        ))}
-                      </ItemGroup>
-                    </div>
+                  <PopoverContent className="w-60 p-0 my-1.25 rounded-none shadow-[0_-10px_10px_-5px_rgba(0,0,0,0.1)]">
+                    <OptionList
+                      label="Event type"
+                      value={state?.eventFilter ?? "AL"}
+                      options={Object.entries(eventTypes).map(([x, y]) => ({
+                        value: x,
+                        label: y.type,
+                        // "All Events" gets a neutral grey ring so every row lines up
+                        icon: <EventTypeIcon color={y.color || "#9B9B9B"} />,
+                      }))}
+                      onSelect={(x) => {
+                        actions?.setEventFilter(x);
+                        setEventFilterOpened(false);
+                      }}
+                    />
                   </PopoverContent>
                 </Popover>
               </Card>
@@ -836,7 +872,7 @@ export const Header = () => {
                 <div className="w-95/100">
                   <Popover
                     open={scenarioOpened}
-                    onOpenChange={() => setScenarioOpened(!scenarioOpened)}
+                    onOpenChange={setScenarioOpened}
                   >
                     <PopoverTrigger asChild>
                       <button type="button" className="flex flex-row items-center w-full h-14.75 justify-around cursor-pointer text-left outline-none underline-offset-4 focus-visible:underline">
@@ -853,29 +889,17 @@ export const Header = () => {
                       </button>
                     </PopoverTrigger>
                     <PopoverContent className="w-56.25 p-0 my-1.25 rounded-none shadow-[0_-10px_10px_-5px_rgba(0,0,0,0.1)]">
-                      <div
-                        className={`flex flex-row justify-center py-2.5 h-[calc(80px*${urlObject[state?.currentHazard][state?.currentExposure].scenarios.length})]`}
-                      >
-                        <ItemGroup>
-                          {urlObject[state?.currentHazard][
-                            state?.currentExposure
-                          ].scenarios.map((x) => (
-                            <Item
-                              key={x}
-                              className={`cursor-pointer my-2 ${scenarioMapper[state?.currentScenario] === scenarioMapper[x] ? "font-bold text-(--orange) underline underline-offset-1.25 decoration-0.5" : ""} transition-all duration-200 ease-in`}
-                              onClick={() => actions?.setScenario(x)}
-                            >
-                              <ItemContent>
-                                <ItemHeader
-                                  onClick={() => actions?.setScenario(x)}
-                                >
-                                  {scenarioMapper[x]}
-                                </ItemHeader>
-                              </ItemContent>
-                            </Item>
-                          ))}
-                        </ItemGroup>
-                      </div>
+                      <OptionList
+                        label="Climate scenario"
+                        value={state?.currentScenario ?? ""}
+                        options={urlObject[state?.currentHazard][
+                          state?.currentExposure
+                        ].scenarios.map((x) => ({ value: x, label: scenarioMapper[x] }))}
+                        onSelect={(x) => {
+                          actions?.setScenario(x);
+                          setScenarioOpened(false);
+                        }}
+                      />
                     </PopoverContent>
                   </Popover>
                 </div>
