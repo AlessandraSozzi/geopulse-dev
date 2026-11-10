@@ -145,6 +145,19 @@ const cardDetails: {
 // the carousel walks the cards in order, then returns to the main entry
 const cycleCategories = cardDetails.map((card) => card.category);
 
+// Pill buttons: hover = darken + lift + arrow nudges right; press settles; keyboard focus shows a ring
+const pillButton =
+  "group rounded-[100px] h-15 flex items-center justify-center py-5 px-10 gap-2 cursor-pointer outline-none " +
+  "shadow-[0_4px_6.5px_0_rgba(0,0,0,0.50)] " + // on the button itself, so it lifts with it on hover
+  "transition-[filter,translate] duration-200 ease-out " +
+  "hover:brightness-90 hover:-translate-y-px active:translate-y-0 active:brightness-85 " +
+  "focus-visible:brightness-90 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-inset " +
+  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--fundblue) " +
+  "motion-reduce:hover:translate-y-0";
+
+const arrowNudge =
+  "transition-transform duration-200 ease-out group-hover:translate-x-1 group-focus-visible:translate-x-1 motion-reduce:transform-none";
+
 export const mapButton = (
   background: string,
   foreground: string,
@@ -156,11 +169,11 @@ export const mapButton = (
   <Link
     to={link}
     activeOptions={{ exact: true }}
-    className={`${background} ${foreground} rounded-[100px] h-15 flex items-center justify-center py-5 px-10 gap-2 cursor-pointer`}
+    className={`${background} ${foreground} ${pillButton}`}
   >
     {icon1}
     <span className="font-bold text-[18px]">{label}</span>
-    {icon2}
+    <span className={arrowNudge}>{icon2}</span>
   </Link>
 );
 
@@ -175,10 +188,10 @@ const externalButton = (
     href={href}
     target="_blank"
     rel="noopener noreferrer"
-    className={`${background} ${foreground} rounded-[100px] h-15 flex items-center justify-center py-5 px-10 gap-2 cursor-pointer`}
+    className={`${background} ${foreground} ${pillButton}`}
   >
     <span className="font-bold text-[18px]">{label}</span>
-    {icon}
+    <span className={arrowNudge}>{icon}</span>
   </a>
 );
 
@@ -534,7 +547,7 @@ function RouteComponent() {
                   key={i}
                   to={e.link}
                   activeOptions={{ exact: true }}
-                  className={`relative overflow-hidden flex w-70 min-h-32 border border-[#A7A7A7] rounded-[6px] shadow-[0_8px_16px_0_rgba(0,0,0,0.14)] bg-white p-5 flex-col justify-between items-start cursor-pointer
+                  className={`group relative overflow-hidden flex w-70 min-h-32 border border-[#A7A7A7] rounded-[6px] shadow-[0_8px_16px_0_rgba(0,0,0,0.14)] bg-white p-5 flex-col justify-between items-start cursor-pointer
                                 ${/* highlight: dim the cards that are not active — delete this line to remove */ ""}
                                 transition-opacity duration-500 ${!highlighting || e.category === activeCategory ? "opacity-100" : "opacity-60"}`}
                   onMouseEnter={() => {
@@ -547,7 +560,7 @@ function RouteComponent() {
                   {e.category === activeCategory && !hovering && (
                     <span
                       key={activeCategory}
-                      className="absolute inset-x-0 top-0 h-1 origin-left bg-(--accentblue-100)"
+                      className="absolute inset-x-0 top-0 h-1 origin-left bg-(--fundblue)"
                       style={{
                         animation: `cardCountdown ${rotationMs}ms linear forwards`,
                       }}
@@ -557,14 +570,14 @@ function RouteComponent() {
                   <div className="flex flex-col w-full justify-between h-full">
                     <div className="w-full flex justify-end">
                       <div
-                        className={`font-bold transition-colors duration-700 ${e.category == activeCategory ? "text-(--accentblue-100)" : "text-black"}`}
+                        className={`font-bold transition-colors duration-700 ${e.category == activeCategory ? "text-(--fundblue)" : "text-black"}`}
                       >
                         {e.misc}
                       </div>
                     </div>
                     {/* Title + arrow. The arrow closes the diagonal with the badge and marks the card as navigable. */}
                     <div
-                      className={`w-full flex items-center justify-between gap-3 transition-colors duration-700 ${e.category == activeCategory ? "text-(--accentblue-100)" : "text-black"}`}
+                      className={`w-full flex items-center justify-between gap-3 transition-colors duration-700 ${e.category == activeCategory ? "text-(--fundblue)" : "text-black"}`}
                     >
                       <span className="text-left uppercase font-bold leading-[110%] tracking-[-0.2px] text-[18px]">
                         {e.title}
@@ -601,7 +614,7 @@ function RouteComponent() {
                 </div>
                 {e.description}
                 {mapButton(
-                  "bg-(--accentdarkblue-90)",
+                  "bg-(--fundblue)",
                   "text-white",
                   <GlobeIcon color={"var(--primarywhite)"} />,
                   <ArrowRight color={"var(--primarywhite)"} />,

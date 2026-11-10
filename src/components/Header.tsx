@@ -444,19 +444,19 @@ export const Header = () => {
       className={`grid ${location.pathname == "/home" ? "mt-10.5 grid-cols-[316px_1fr]" : "grid-cols-[1fr] xl:grid-cols-[200px_1fr]"} xl:h-14.75 fixed w-full top-0 z-3 ${dataOptions || menuOptions ? "" : "overflow-hidden h-14.75"} ${location.pathname == "/home" ? "overflow-visible" : ""} xl:h-[unset]`}
     >
       <div
-        className={`${location.pathname == "/home" ? "ml-8" : ""} flex flex-col ${menuOptions ? "z-2 " : "-z-10 h-0 overflow-hidden"} ${location.pathname == "/home" ? "w-71" : "w-full xl:w-50"} bg-(--accentdarkblue-90) xl:bg-[unset] absolute shadow-xl/40`}
+        className={`${location.pathname == "/home" ? "ml-8" : ""} flex flex-col ${menuOptions ? "z-2 " : "-z-10 h-0 overflow-hidden"} ${location.pathname == "/home" ? "w-71" : "w-full xl:w-50"} ${location.pathname == "/home" ? "bg-(--fundblue)" : "bg-(--accentdarkblue-90)"} xl:bg-[unset] absolute shadow-xl/40`}
       >
         <button
           type="button"
           aria-label="Close menu"
-          className={`flex w-16.75 ${location.pathname == "/home" ? "h-16" : "h-14.75"} justify-center items-center bg-(--accentdarkblue-90) cursor-pointer outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#234E90]`}
+          className={`flex w-16.75 ${location.pathname == "/home" ? "h-16 bg-(--fundblue)" : "h-14.75 bg-(--accentdarkblue-90)"} justify-center items-center cursor-pointer outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#234E90]`}
           onClick={() => setMenuOptions(!menuOptions)}
         >
           <div className="flex items-center flex-center">
             <CloseIcon color="white" />
           </div>
         </button>
-        <div className="pl-7 bg-(--accentdarkblue-90)">
+        <div className={`pl-7 ${location.pathname == "/home" ? "bg-(--fundblue)" : "bg-(--accentdarkblue-90)"}`}>
           <Link
             to="/about"
             activeOptions={{ exact: true }}
@@ -507,7 +507,7 @@ export const Header = () => {
               onClick={() => setMenuOptions(!menuOptions)}
             >
               <div className="flex h-16 w-full">
-                <div className="relative flex items-center rounded-none h-full w-17.5 border-r bg-(--accentdarkblue-90) xl:bg-(--accentdarkblue-90) text-white">
+                <div className="relative flex items-center rounded-none h-full w-17.5 border-r bg-(--fundblue) text-white">
                   <img className="absolute right-4" src={Hamburger}></img>
                   <div className="absolute text-[11px] top-8.5 right-6.5 font-bold">
                     MENU
@@ -519,7 +519,7 @@ export const Header = () => {
           <Link
             to="/home"
             activeOptions={{ exact: true }}
-            className="z-10 w-60 rounded-none flex items-center justify-center bg-(--fundblue) border-none"
+            className="z-10 w-60 rounded-none flex items-center justify-center bg-(--accentdarkblue-90) border-none"
           >
             <img className="px-9 py-6.25" src={Lockup}></img>
           </Link>
@@ -568,9 +568,9 @@ export const Header = () => {
       )}
       {location.pathname == "/home" ? (
         <div className="invisible md:visible w-full flex items-center justify-end">
-          <div className="rounded-[100px] mr-8 h-15 shadow-[0_4px_6.5px_0_rgba(0,0,0,0.50)]">
+          <div className="mr-8">
             {mapButton(
-              "bg-(--accentdarkblue-90)",
+              "bg-(--fundblue)", // shadow comes from mapButton's shared pill style
               "text-white",
               <GlobeIcon color={"var(--primarywhite)"} />,
               <ArrowRight color={"var(--primarywhite)"} />,
