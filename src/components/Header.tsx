@@ -61,6 +61,13 @@ import {
   HazardIcon,
   SmallChevron,
 } from "../assets/NavIcons";
+import { HazardExposureMenu, HazardExposureColumns } from "./HazardExposureMenu";
+
+// Hazard/exposure dropdown variant:
+//   "original" = old accordion (code below, untouched)
+//   "panels"   = v1: hazards left, exposures of the hovered hazard right
+//   "columns"  = v2: one column per hazard with its exposures; one click picks a pair
+const HAZARD_MENU = "columns" as "original" | "panels" | "columns";
 
 
 // Single-choice dropdown list used by the event-type and scenario dropdowns.
@@ -196,6 +203,28 @@ export const Header = () => {
   };
   const [dataOptions, setDataOptions] = useState<boolean>(false);
   const [menuOptions, setMenuOptions] = useState<boolean>(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // close the menu on a click/tap outside it, or on Escape
+  useEffect(() => {
+    if (!menuOptions) return;
+    const onPointerDown = (e: PointerEvent) => {
+      const target = e.target as Element;
+      if (menuRef.current?.contains(target)) return; // inside the panel
+      if (target.closest("[data-menu-toggle]")) return; // MENU button handles its own toggle
+      setMenuOptions(false);
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOptions(false);
+    };
+    // capture phase, so clicks on the ArcGIS map canvas (which stops propagation) are caught too
+    document.addEventListener("pointerdown", onPointerDown, true);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown, true);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [menuOptions]);
 
   const [open, setOpen] = React.useState(false);
   const [iso3, setIso3] = useState("");
@@ -444,19 +473,20 @@ export const Header = () => {
       className={`grid ${location.pathname == "/home" ? "mt-10.5 grid-cols-[316px_1fr]" : "grid-cols-[1fr] xl:grid-cols-[200px_1fr]"} xl:h-14.75 fixed w-full top-0 z-3 ${dataOptions || menuOptions ? "" : "overflow-hidden h-14.75"} ${location.pathname == "/home" ? "overflow-visible" : ""} xl:h-[unset]`}
     >
       <div
-        className={`${location.pathname == "/home" ? "ml-8" : ""} flex flex-col ${menuOptions ? "z-2 " : "-z-10 h-0 overflow-hidden"} ${location.pathname == "/home" ? "w-71" : "w-full xl:w-50"} ${location.pathname == "/home" ? "bg-(--fundblue)" : "bg-(--accentdarkblue-90)"} xl:bg-[unset] absolute shadow-xl/40`}
+        ref={menuRef}
+        className={`${location.pathname == "/home" ? "ml-8" : ""} flex flex-col ${menuOptions ? "z-2 " : "-z-10 h-0 overflow-hidden"} ${location.pathname == "/home" ? "w-71" : "w-full xl:w-50"} bg-(--fundblue) xl:bg-[unset] absolute shadow-xl/40`}
       >
         <button
           type="button"
           aria-label="Close menu"
-          className={`flex w-16.75 ${location.pathname == "/home" ? "h-16 bg-(--fundblue)" : "h-14.75 bg-(--accentdarkblue-90)"} justify-center items-center cursor-pointer outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#234E90]`}
+          className={`flex w-16.75 ${location.pathname == "/home" ? "h-16" : "h-14.75"} bg-(--fundblue) justify-center items-center cursor-pointer outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#234E90]`}
           onClick={() => setMenuOptions(!menuOptions)}
         >
           <div className="flex items-center flex-center">
             <CloseIcon color="white" />
           </div>
         </button>
-        <div className={`pl-7 ${location.pathname == "/home" ? "bg-(--fundblue)" : "bg-(--accentdarkblue-90)"}`}>
+        <div className="pl-7 bg-(--fundblue)">
           <Link
             to="/about"
             activeOptions={{ exact: true }}
@@ -479,7 +509,10 @@ export const Header = () => {
             <button
               type="button"
               className="flex items-center w-full h-14.75 text-white cursor-pointer text-left outline-none underline-offset-4 focus-visible:underline"
-              onClick={() => actions?.setDataExplainerState(true)}
+              onClick={() => {
+                setMenuOptions(false);
+                actions?.setDataExplainerState(true);
+              }}
             >
               Data Explainer
             </button>
@@ -503,6 +536,7 @@ export const Header = () => {
             <button
               type="button"
               aria-label="Open menu"
+            data-menu-toggle
               className="flex cursor-pointer outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#234E90]"
               onClick={() => setMenuOptions(!menuOptions)}
             >
@@ -526,16 +560,17 @@ export const Header = () => {
         </div>
       ) : (
         <div
-          className={`flex w-full xl:w-50 justify-between xl:justify-start bg-(--fundblue) ${dataOptions ? "h-0" : "h-14.75"} overflow-hidden xl:h-14.75`}
+          className={`flex w-full xl:w-50 justify-between xl:justify-start bg-(--accentdarkblue-90) ${dataOptions ? "h-0" : "h-14.75"} overflow-hidden xl:h-14.75`}
         >
           <button
             type="button"
             aria-label="Open menu"
+            data-menu-toggle
             className="flex cursor-pointer outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#234E90]"
             onClick={() => setMenuOptions(!menuOptions)}
           >
             <div className="flex h-14.75 w-35 lg:w-auto">
-              <div className="relative flex pl-2 items-center justify-start rounded-none h-full w-40 xl:w-16.75 bg-(--fundblue) xl:bg-(--accentdarkblue-90) text-white">
+              <div className="relative flex pl-2 items-center justify-start rounded-none h-full w-40 xl:w-16.75 bg-(--fundblue) text-white">
                 <img className="absolute pl-3.5" src={Hamburger}></img>
                 <div className="absolute text-[11px] top-8.5  font-bold">
                   MENU
@@ -546,12 +581,12 @@ export const Header = () => {
           <Link
             to="/home"
             activeOptions={{ exact: true }}
-            className="rounded-none w-30 lg:mx-3 flex flex-row items-center justify-center font-semibold bg-(--fundblue) text-white border-none"
+            className="rounded-none w-30 lg:mx-3 flex flex-row items-center justify-center font-semibold bg-(--accentdarkblue-90) text-white border-none"
           >
             <img src={Lockup}></img>
           </Link>
           <div
-            className={`flex items-center w-35 xl:w-0 xl:h-0 overflow-hidden justify-center cursor-pointer bg-(--fundblue) rounded-none border-0 border-none`}
+            className={`flex items-center w-35 xl:w-0 xl:h-0 overflow-hidden justify-center cursor-pointer bg-(--accentdarkblue-90) rounded-none border-0 border-none`}
           >
             <button
               type="button"
@@ -827,7 +862,46 @@ export const Header = () => {
                         <CircleChevron open={riskOpened} />
                       </button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-75 p-0 py-5 my-1.25 rounded-none shadow-[0_-10px_10px_-5px_rgba(0,0,0,0.1)]">
+                    <PopoverContent
+                      className={
+                        HAZARD_MENU !== "original"
+                          ? "w-auto p-0 my-1.25 rounded-none shadow-[0_-10px_10px_-5px_rgba(0,0,0,0.1)]"
+                          : "w-75 p-0 py-5 my-1.25 rounded-none shadow-[0_-10px_10px_-5px_rgba(0,0,0,0.1)]"
+                      }
+                    >
+                      {HAZARD_MENU === "columns" ? (
+                        <HazardExposureColumns
+                          hazard={state?.currentHazard ?? ""}
+                          exposure={state?.currentExposure ?? ""}
+                          onSelect={(h, e) => {
+                            const b = urlObject[h][e];
+                            swapTable(
+                              h,
+                              e,
+                              { name: "", threshold: Object.keys(b.threshold?.group || {})[0] },
+                              { id: b.measure[0], name: measureMapper[b.measure[0]] },
+                              state?.currentScenario ?? "",
+                            );
+                            setRiskOpened(false); // close after choosing
+                          }}
+                        />
+                      ) : HAZARD_MENU === "panels" ? (
+                        <HazardExposureMenu
+                          hazard={state?.currentHazard ?? ""}
+                          exposure={state?.currentExposure ?? ""}
+                          onSelect={(h, e) => {
+                            const b = urlObject[h][e];
+                            swapTable(
+                              h,
+                              e,
+                              { name: "", threshold: Object.keys(b.threshold?.group || {})[0] },
+                              { id: b.measure[0], name: measureMapper[b.measure[0]] },
+                              state?.currentScenario ?? "",
+                            );
+                            setRiskOpened(false); // close after choosing
+                          }}
+                        />
+                      ) : (
                       <div className="mx-3">
                         <ItemGroup>
                           {Object.entries(urlObject).map(([key, value]) => {
@@ -884,6 +958,7 @@ export const Header = () => {
                           })}
                         </ItemGroup>
                       </div>
+                      )}
                     </PopoverContent>
                   </Popover>
                 </div>
