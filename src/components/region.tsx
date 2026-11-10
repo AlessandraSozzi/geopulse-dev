@@ -21,6 +21,7 @@ import {
 import { Exporting } from "@highcharts/react/options/Exporting";
 
 import { countryByIso3 } from "@/config/isoCountries";
+import { MapDisclaimer } from "@/components/MapDisclaimer";
 import {
   urlObject,
   scenarioMapper,
@@ -745,6 +746,9 @@ export const Region = ({
               >
                 <Exporting />
               </MapsChart>
+              <div className="flex w-full justify-end px-4 pb-2 text-[11px] text-[#999999]">
+                <MapDisclaimer />
+              </div>
             </div>
           </div>
           <div className="flex flex-col justify-center items-center w-full pt-10">

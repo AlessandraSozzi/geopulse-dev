@@ -68,6 +68,7 @@ import ImageryTileLayer from "@arcgis/core/layers/ImageryTileLayer.js";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer.js";
 import VectorTileLayer from "@arcgis/core/layers/VectorTileLayer.js";
 import { createBasemapLayers } from "@/lib/basemap";
+import { MapDisclaimer } from "@/components/MapDisclaimer";
 
 // arcgis map components
 import "@arcgis/map-components/components/arcgis-scale-bar";
@@ -2248,6 +2249,11 @@ function Events() {
                     </div>
                   </>
                 )}
+
+                <div className="mt-3 flex items-baseline justify-between gap-3 border-t border-white/10 pt-2 text-[10px] text-[#A1A1A6]">
+                  <span>{exposure.source}</span>
+                  <MapDisclaimer />
+                </div>
               </>
             );
           })()}

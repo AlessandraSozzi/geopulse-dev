@@ -14,6 +14,7 @@ import { buildGridUrl, buildGridLegend } from "@/config/datasets";
 import { Thresholds } from "@/components/thresholds";
 import { cn } from "@/lib/utils";
 import { createBasemapLayers } from "@/lib/basemap";
+import { MapDisclaimer } from "@/components/MapDisclaimer";
 import type VectorTileLayer from "@arcgis/core/layers/VectorTileLayer.js";
 import ImageryTileLayer from "@arcgis/core/layers/ImageryTileLayer";
 
@@ -390,9 +391,13 @@ function GridView() {
           <span className="col-start-3 mt-1 w-28 text-center text-[11px] text-[#4FD1BC]">{legend.hazardAxis}</span>
         </div>
 
-        <p className="mt-3 text-[10px] leading-snug text-[#A1A1A6]">
-          {legend.note} {legend.source}
-        </p>
+        {legend.note && (
+          <p className="mt-3 text-[10px] leading-snug text-[#A1A1A6]">{legend.note}</p>
+        )}
+        <div className="mt-3 flex items-baseline justify-between gap-3 border-t border-white/10 pt-2 text-[10px] text-[#A1A1A6]">
+          <span>{legend.source}</span>
+          <MapDisclaimer />
+        </div>
       </div>
       )}
       {/* left = 8px inset + 264px legend + 8px gap */}

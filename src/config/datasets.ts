@@ -615,6 +615,7 @@ export const realtimeObject: Record<
     legendLabel?: string; // what the symbol represents, e.g. "Airport", "Cropland"
     categoryLabels?: Record<string, string>; // short display names for sub-layers; keys stay the url keys
     totalLabel?: string; // chip that selects the whole layer, e.g. "All ages"; omitted when there's no total
+    source?: string; // legend footer line, e.g. "Source: WorldPop."
   }
 > = {
   Population: {
@@ -672,6 +673,7 @@ export const realtimeObject: Record<
       },
     ],
     title: "population",
+    source: "Source: WorldPop.",
     unit: "(people per 30″ cell, ≈1 km²)",
     suffix: "people",
     eventAttribute: "population",
@@ -736,6 +738,7 @@ export const realtimeObject: Record<
       },
     ],
     title: "buildings",
+    source: "Source: Global Building Atlas, IMF staff calculations.",
     unit: "(buildings per 30″ cell, ≈1 km²)",
     suffix: "assets",
     eventAttribute: "buildings",
@@ -796,6 +799,7 @@ export const realtimeObject: Record<
       },
     ],
     title: "Capital stock",
+    source: "Source: IMF GeoPulse.",
     unit: "(US$ per 30″ cell, ≈1 km²)",
     suffix: "in 2021 USD",
     eventAttribute: "capitalstock_res",
@@ -843,6 +847,7 @@ export const realtimeObject: Record<
       },
     ],
     title: "night-time luminosity",
+    source: "Source: NASA VIIRS (harmonized).",
     unit: "(nW/cm²/sr)",
     suffix: "",
     eventAttribute: "N/A",
@@ -905,6 +910,7 @@ export const realtimeObject: Record<
       },
     ],
     title: "gdp",
+    source: "Source: IMF GeoPulse.",
     unit: "(US$ PPP per 30″ cell, ≈1 km²)",
     suffix: "USD",
     eventAttribute: "gdp",
@@ -1040,6 +1046,7 @@ export const realtimeObject: Record<
       },
     ],
     title: "urban gdp",
+    source: "Sources: Global Human Settlement Layer, IMF GeoPulse.",
     unit: "(US$ PPP per 30″ cell, ≈1 km²)",
     suffix: "USD",
     eventAttribute: "urbangdp",
@@ -1057,6 +1064,7 @@ export const realtimeObject: Record<
       },
     ],
     title: "land cover class: cropland",
+    source: "Source: Esri.",
     unit: "(present where cropland covers most of a 30″ cell, ≈1 km²)",
     suffix: "hectares",
     eventAttribute: "cropland",
@@ -1076,6 +1084,7 @@ export const realtimeObject: Record<
       },
     ],
     title: "airports",
+    source: "Sources: Flightradar24, IMF staff calculations.",
     unit: "",
     suffix: "airports",
     eventAttribute: "airports",
@@ -1095,6 +1104,7 @@ export const realtimeObject: Record<
       },
     ],
     title: "ports",
+    source: "Source: IMF PortWatch.",
     unit: "",
     suffix: "ports",
     eventAttribute: "ports",
