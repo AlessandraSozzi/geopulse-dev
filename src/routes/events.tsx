@@ -80,7 +80,7 @@ import SimpleRenderer from "@arcgis/core/renderers/SimpleRenderer";
 import SimpleMarkerSymbol from "@arcgis/core/symbols/SimpleMarkerSymbol";
 
 // dataset object configurations
-import { realtimeObject, eventTypes } from "@/config/datasets";
+import { realtimeObject, eventTypes, subLayerLabel } from "@/config/datasets";
 import { countryByIso3 } from "@/config/isoCountries";
 
 //import loading overlay component
@@ -1303,7 +1303,7 @@ function Events() {
               <div className="flex flex-col items-center gap-1">
                 {/* <svg></svg> */}
                 <span className="font-bold text-[11px] text-left text-[#4A5A70]">
-                  {x}
+                  {subLayerLabel(exposure, x)}
                 </span>
               </div>
               <span className="text-[#0B1B33] text-[17px] font-bold">N/A</span>
@@ -1484,7 +1484,7 @@ function Events() {
                   >
                     <div className="h-9/10 flex justify-center items-center overflow-hidden">
                       <div className="text-white text-[12px] font-bold">
-                        {f}
+                        {subLayerLabel(key, f)}
                       </div>
                     </div>
                   </div>
@@ -2167,6 +2167,11 @@ function Events() {
                 <h3 className="flex items-center gap-2 text-[12px] font-bold uppercase leading-tight tracking-wide">
                   {exposure.icon && <LegendIcon d={exposure.icon} />}
                   {exposure.title}
+                  {realtimeExposure.filter !== realtimeExposure.exposure && (
+                    <span className="text-white/70">
+                      · {subLayerLabel(realtimeExposure.exposure, realtimeExposure.filter)}
+                    </span>
+                  )}
                 </h3>
                 {exposure.unit && (
                   <p className="mt-0.5 text-[11px] text-white">
