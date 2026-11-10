@@ -488,6 +488,37 @@ function RouteComponent() {
     };
   }, []);
 
+  // "Built to be Used" cards: bounce in once, the first time the section scrolls into view
+  const featuresRef = useRef<HTMLDivElement>(null);
+  const [featuresIn, setFeaturesIn] = useState(false);
+  useEffect(() => {
+    const el = featuresRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setFeaturesIn(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.25 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  const featureCard = (e: (typeof featureCategories)[number]) => (
+    <div
+      key={e.title}
+      style={{ animationDelay: `${e.position * 120}ms` }}
+      className={`flex p-10 flex-col items-start gap-4 rounded-[6px] border-[0.5px] bg-white shadow-[0_10px_14px_0_rgba(0,0,0,0.12)] text-left ${featuresIn ? "card-pop" : "card-hidden"}`}
+    >
+      <img src={e.icon}></img>
+      <span className="text-[24px] font-bold leading-[120%]">{e.title}</span>
+      <span className="text-[16px] leading-[140%]">{e.subtitle}</span>
+    </div>
+  );
+
   const [activeCategory, setActiveCategory] = useState<string>(mainCategory);
   const [hovering, setHovering] = useState(false);
   // While the pointer is on a card the user is driving; otherwise the hero rests on the main
@@ -637,42 +668,15 @@ function RouteComponent() {
           </span>
         </div>
         <div className="flex w-full justify-center items-center">
-          <div className="grid grid-cols-1 grid-rows-1 md:grid-cols-2 gap-10 md:gap-10 py-10 w-9/10">
+          <div
+            ref={featuresRef}
+            className="grid grid-cols-1 grid-rows-1 md:grid-cols-2 gap-10 md:gap-10 py-10 w-9/10"
+          >
             <div className="grid grid-cols-1 grid-rows-2 gap-10 h-140">
-              {featureCategories
-                .filter((i) => i.position < 2)
-                .map((e, i) => (
-                  <div
-                    className={`flex p-10 flex-col items-start gap-4 rounded-[6px] border-[0.5px] bg-white shadow-[0_10px_14px_0_rgba(0,0,0,0.12)] text-left`}
-                    key={i}
-                  >
-                    <img src={e.icon}></img>
-                    <span className="text-[24px] font-bold leading-[120%]">
-                      {e.title}
-                    </span>
-                    <span className="text-[16px] leading-[140%]">
-                      {e.subtitle}
-                    </span>
-                  </div>
-                ))}
+              {featureCategories.filter((i) => i.position < 2).map(featureCard)}
             </div>
             <div className="grid grid-cols-1 grid-rows-2 gap-10 md:mt-20 h-140">
-              {featureCategories
-                .filter((i) => i.position > 1)
-                .map((e, i) => (
-                  <div
-                    className={`flex p-10 flex-col items-start gap-4 rounded-[6px] border-[0.5px] bg-white shadow-[0_10px_14px_0_rgba(0,0,0,0.12)] text-left`}
-                    key={i}
-                  >
-                    <img src={e.icon}></img>
-                    <span className="text-[24px] font-bold leading-[120%]">
-                      {e.title}
-                    </span>
-                    <span className="text-[16px] leading-[140%]">
-                      {e.subtitle}
-                    </span>
-                  </div>
-                ))}
+              {featureCategories.filter((i) => i.position > 1).map(featureCard)}
             </div>
           </div>
         </div>
