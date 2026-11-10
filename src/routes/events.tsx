@@ -40,6 +40,7 @@ import Exposures from "../assets/Layers.svg";
 import {
   Activity,
   Check,
+  ChevronRight,
   Flame,
   Mountain,
   Sun,
@@ -1425,74 +1426,80 @@ function Events() {
             <img src={Exposures}></img>
           </div>
         </div>
-        {Object.entries(realtimeObject).map(([key, layer], index: number) => (
-          <div
-            key={index}
-            id={`${index}`}
-            className={`absolute -z-1 md:z-1 left-8.25 pointer-events-none`}
-            style={{ top: index * 55 + 200 }}
-            onMouseLeave={() => setPopInState("")}
-          >
-            <div className=" flex gap-2 items-start pointer-events-none has-[.pop-in]:pointer-events-auto">
-              <div
-                className={`flex items-center border-solid transition-all duration-300 text-white`}
-              >
+        {/* Layer buttons: main button = whole layer; chips (on hover) = total + sub-layers */}
+        {Object.entries(realtimeObject).map(([key, layer], index: number) => {
+          const selected = realtimeExposure.exposure === key;
+          const subSelected = selected && realtimeExposure.filter !== key;
+          const open = popInState === key;
+          const chips = [
+            ...(layer.totalLabel ? [{ value: key, label: layer.totalLabel }] : []),
+            ...layer.categories.map((f) => ({ value: f, label: subLayerLabel(key, f) })),
+          ];
+          return (
+            <div
+              key={key}
+              id={`${index}`}
+              className="absolute -z-1 md:z-1 left-8.25 pointer-events-none"
+              style={{ top: index * 55 + 200 }}
+              onMouseLeave={() => setPopInState("")}
+            >
+              <div className="flex gap-2 items-start pointer-events-none has-[.chip-in]:pointer-events-auto">
+                {/* main button */}
                 <div
-                  className={`flex items-center pointer-events-auto cursor-pointer transition-all duration-300  text-white`}
-                  onClick={() =>
-                    setRealtimeExposure({ exposure: key, filter: key })
-                  }
+                  className={`group flex items-center h-[37px] pr-3 rounded-full border pointer-events-auto cursor-pointer text-white transition-colors duration-150 ${
+                    selected
+                      ? "bg-(--primaryblue-100) border-(--primaryblue-100)"
+                      : "bg-[#1B1B1D] border-[#2A3B5F] hover:bg-[#2A3B5F] hover:border-[#3D5687]"
+                  }`}
+                  onClick={() => setRealtimeExposure({ exposure: key, filter: key })}
                   onMouseEnter={() => togglePopIn(key)}
                 >
-                  <div
-                    className={`rounded-full flex items-center justify-start ${realtimeExposure.exposure == key ? "bg-(--accentblue-100)" : "bg-black hover:bg-(--accentdarkblue-100)"} transition-all duration-300 border-[1.37px] border-solid border-[#0084FF] h-[37px] pr-[10px]`}
-                  >
-                    <div className="rounded-full flex items-center justify-center bg-black border border-solid border-[#0084FF] h-[37px] w-[37px]">
-                      <svg
-                        width="17"
-                        height="17"
-                        viewBox="0 0 17 17"
-                        fill="white"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path d={layer.icon} />
-                      </svg>
-                    </div>
-                    <div className="text-white text-[12px] ml-3 font-bold">
-                      {key}
-                    </div>
+                  <div className="-ml-px flex items-center justify-center size-[37px] shrink-0 rounded-full bg-[#1B1B1D] border border-[#2A3B5F]">
+                    <svg width="17" height="17" viewBox="0 0 17 17" fill="white" xmlns="http://www.w3.org/2000/svg">
+                      <path d={layer.icon} />
+                    </svg>
                   </div>
+                  <span className="ml-3 text-[12px] font-bold whitespace-nowrap">{key}</span>
+                  {subSelected && (
+                    <span className="ml-1 text-[12px] text-white/85 whitespace-nowrap">
+                      · {subLayerLabel(key, realtimeExposure.filter)}
+                    </span>
+                  )}
+                  {chips.length > 0 && (
+                    <ChevronRight
+                      className={`ml-1 size-3.5 shrink-0 transition-opacity duration-150 ${open ? "opacity-100" : "opacity-50 group-hover:opacity-100"}`}
+                      strokeWidth={2.5}
+                    />
+                  )}
+                </div>
+
+                {/* sub-layer chips */}
+                <div className="mt-[2.5px] flex gap-1.5 flex-wrap max-w-5/10 items-center pointer-events-none has-[.chip-in]:pointer-events-auto">
+                  {chips.map((c, i) => {
+                    const on = selected && realtimeExposure.filter === c.value;
+                    return (
+                      <div
+                        key={c.value}
+                        className={`flex items-center gap-1.5 h-8 px-3.5 rounded-full border text-[12px] font-bold text-white whitespace-nowrap cursor-pointer opacity-0 transition-colors duration-150 ${
+                          open ? "chip-in" : popInState === "initial" ? "" : "chip-out"
+                        } ${
+                          on
+                            ? "bg-(--primaryblue-100) border-(--primaryblue-100)"
+                            : "bg-[#1B1B1D] border-[#2A3B5F] hover:bg-[#2A3B5F] hover:border-[#3D5687]"
+                        }`}
+                        style={{ animationDelay: open ? `${i * 40}ms` : "0ms" }}
+                        onClick={() => setRealtimeExposure({ exposure: key, filter: c.value })}
+                      >
+                        {on && <Check className="size-3.5" strokeWidth={3} />}
+                        {c.label}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
-              <div
-                id="exposureContainer"
-                className={`pointer-events-none has-[.pop-in]:pointer-events-auto flex gap-2 ml-10 flex-wrap max-w-5/10 items-center border-solid transition-all duration-300 text-white`}
-              >
-                {layer.categories.map((f: any, index: number) => (
-                  <div
-                    key={`exposure_category_${f}`}
-                    id={`exposure_category_${f}`}
-                    className={`exposure_ h-9 bg-black border-2 rounded-2xl px-5 opacity-0 cursor-pointer ${popInState == key ? "pop-in" : popInState == "initial" ? "pop-default" : "pop-out"} ${realtimeExposure.filter == f ? "border-(--cyan)" : "border-(--accentdarkblue-50)"}`}
-                    style={
-                      popInState == "initial"
-                        ? { animationDelay: index * 0 + "ms" }
-                        : { animationDelay: index * 50 + "ms" }
-                    }
-                    onClick={() =>
-                      setRealtimeExposure({ exposure: key, filter: f })
-                    }
-                  >
-                    <div className="h-9/10 flex justify-center items-center overflow-hidden">
-                      <div className="text-white text-[12px] font-bold">
-                        {subLayerLabel(key, f)}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
         <div
           className={`absolute ${layerSettingsPopup ? "z-3" : "-z-1"} top-0 h-full w-full bg-[#00000090] flex items-center justify-center`}
         >
@@ -2166,12 +2173,14 @@ function Events() {
               <>
                 <h3 className="flex items-center gap-2 text-[12px] font-bold uppercase leading-tight tracking-wide">
                   {exposure.icon && <LegendIcon d={exposure.icon} />}
-                  {exposure.title}
-                  {realtimeExposure.filter !== realtimeExposure.exposure && (
-                    <span className="text-white/70">
-                      · {subLayerLabel(realtimeExposure.exposure, realtimeExposure.filter)}
-                    </span>
-                  )}
+                  <span>
+                    {exposure.title}
+                    {realtimeExposure.filter !== realtimeExposure.exposure && (
+                      <span className="text-white/70">
+                        {" "}· {subLayerLabel(realtimeExposure.exposure, realtimeExposure.filter)}
+                      </span>
+                    )}
+                  </span>
                 </h3>
                 {exposure.unit && (
                   <p className="mt-0.5 text-[11px] text-white">
