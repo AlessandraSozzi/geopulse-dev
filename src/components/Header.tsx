@@ -137,6 +137,10 @@ export const Header = () => {
   const flFiltersRef = useRef<HTMLDivElement>(null);
   const explainerRef = useRef<HTMLDivElement>(null);
   const lastLeft = useRef(new WeakMap<HTMLElement, number>());
+  // true while the panels slide: only then (and on closed panels) are the clip-path and translate applied.
+  // Popovers here are not portalled, and a transform or clip-path on an ancestor clips them,
+  // so the open panel must have neither once it has settled.
+  const [sliding, setSliding] = useState(false);
 
   useLayoutEffect(() => {
     const animate =
@@ -154,6 +158,9 @@ export const Header = () => {
         { duration: 500, easing: "cubic-bezier(0.22,1,0.36,1)" },
       );
     });
+    setSliding(true);
+    const t = window.setTimeout(() => setSliding(false), 550);
+    return () => window.clearTimeout(t);
   }, [location.pathname]);
 
   const state = useContext(AppStateContext);
@@ -605,10 +612,10 @@ export const Header = () => {
           </div>
           <div
             inert={!isEvents}
-            className={`${isEvents ? "flex" : "hidden xl:flex"} ${dataOptions ? "h-full" : "h-0"} xl:h-auto w-full min-w-0 overflow-hidden xl:overflow-visible xl:[clip-path:inset(0_-100vw_0_0)] col-start-1 col-end-4 xl:col-start-2 xl:col-end-3`}
+            className={`${isEvents ? "flex" : "hidden xl:flex"} ${dataOptions ? "h-full" : "h-0"} xl:h-auto w-full min-w-0 overflow-hidden xl:overflow-visible ${sliding || !isEvents ? "xl:[clip-path:inset(0_-100vw_0_0)]" : ""} col-start-1 col-end-4 xl:col-start-2 xl:col-end-3`}
           >
             <div
-              className={`flex flex-col xl:flex-row w-full xl:w-150 xl:shrink-0 ${slide} ${isEvents ? "xl:translate-x-0" : "xl:-translate-x-full"}`}
+              className={`flex flex-col xl:flex-row w-full xl:w-150 xl:shrink-0 ${slide} ${isEvents ? "xl:translate-none" : "xl:-translate-x-full"}`}
             >
               {calendarComponent}
               <Card className="rounded-none border-r-0 p-0 flex flex-col items-center justify-center gap-0 h-22 xl:h-14.75 w-full px-2">
@@ -792,10 +799,10 @@ export const Header = () => {
           <div
             ref={flFiltersRef}
             inert={!isForward}
-            className={`isolate ${isForward ? "flex" : "hidden xl:flex"} ${dataOptions ? "h-full" : "h-0"} xl:h-14.75 min-w-0 overflow-hidden xl:overflow-visible xl:[clip-path:inset(0_-100vw_0_0)] w-full col-start-1 col-end-4 xl:col-start-4 xl:col-end-5`}
+            className={`isolate ${isForward ? "flex" : "hidden xl:flex"} ${dataOptions ? "h-full" : "h-0"} xl:h-14.75 min-w-0 overflow-hidden xl:overflow-visible ${sliding || !isForward ? "xl:[clip-path:inset(0_-100vw_0_0)]" : ""} w-full col-start-1 col-end-4 xl:col-start-4 xl:col-end-5`}
           >
             <div
-              className={`flex flex-col xl:flex-row w-full xl:w-150 xl:shrink-0 ${slide} ${isForward ? "xl:translate-x-0" : "xl:-translate-x-full"}`}
+              className={`flex flex-col xl:flex-row w-full xl:w-150 xl:shrink-0 ${slide} ${isForward ? "xl:translate-none" : "xl:-translate-x-full"}`}
             >
               <Card
                 id="hazardExposure"
