@@ -1,5 +1,5 @@
 import React from "react";
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, useContext } from "react";
 import { useRouterState, Link } from "@tanstack/react-router";
 
 import { AppStateContext, AppActionsContext } from "../app";
@@ -122,6 +122,39 @@ export const Header = () => {
   const tabShadow = "shadow-[2px_2px_8px_0_rgba(0,0,0,0.25)]";
   const tabOutline = "border border-[#C9D6EA]";
   const tabEdge = lightPage ? tabOutline : tabShadow;
+
+  // Filter panels stay mounted; switching section animates the grid columns and slides the contents
+  // out from / back behind their tab (desktop only; mobile keeps the stacked layout)
+  const isEvents = location.pathname === "/events";
+  const isForward = location.pathname === "/compare" || location.pathname === "/grid";
+  const slideEase = "xl:duration-500 xl:ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none";
+  const slide = `xl:transition-transform ${slideEase}`;
+
+  // Column widths snap; the pieces that move (Forward Looking tab, its filters, Data Explainer) glide from
+  // their old position with a transform (FLIP). Transforms run on the compositor, so the map loading on
+  // the new page can't make the slide stutter (animating grid-template-columns did).
+  const flTabRef = useRef<HTMLDivElement>(null);
+  const flFiltersRef = useRef<HTMLDivElement>(null);
+  const explainerRef = useRef<HTMLDivElement>(null);
+  const lastLeft = useRef(new WeakMap<HTMLElement, number>());
+
+  useLayoutEffect(() => {
+    const animate =
+      window.matchMedia("(min-width: 80rem)").matches && // xl only
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    [flTabRef, flFiltersRef, explainerRef].forEach(({ current: el }) => {
+      if (!el) return;
+      const left = el.offsetLeft;
+      const prev = lastLeft.current.get(el);
+      lastLeft.current.set(el, left);
+      if (!animate || prev === undefined || prev === left) return;
+      el.getAnimations().forEach((a) => a.cancel());
+      el.animate(
+        [{ transform: `translateX(${prev - left}px)` }, { transform: "translateX(0)" }],
+        { duration: 500, easing: "cubic-bezier(0.22,1,0.36,1)" },
+      );
+    });
+  }, [location.pathname]);
 
   const state = useContext(AppStateContext);
   const actions = useContext(AppActionsContext);
@@ -540,12 +573,12 @@ export const Header = () => {
         </div>
       ) : (
         <div
-          className={`w-full xl:h-14.75 grid grid-cols-[1fr_1fr_50px] ${location.pathname === "/compare" || location.pathname === "/grid" ? "xl:grid-cols-[180px_300px_600px_1fr]" : location.pathname == "/events" ? "xl:grid-cols-[180px_600px_245px_1fr]" : "xl:grid-cols-[180px_360px_1fr]"}  xl:col-start-2 xl:col-end-3`}
+          className={`w-full xl:h-14.75 grid grid-cols-[1fr_1fr_50px] ${isEvents ? "xl:grid-cols-[180px_600px_245px_0px_1fr]" : isForward ? "xl:grid-cols-[180px_0px_300px_600px_1fr]" : "xl:grid-cols-[180px_0px_360px_0px_1fr]"} xl:col-start-2 xl:col-end-3`}
         >
           <div className="flex w-full xl:w-auto xl:ml-1 xl:col-start-1 xl:col-end-2">
             <Card
               className={cn(
-                `relative z-1 rounded-none p-0 flex flex-col items-center justify-center w-full gap-0 hover:bg-white transition-colors duration-200 ${location.pathname == "/events" ? "bg-white" : "bg-(--lightblue)"} border-0`,
+                `relative z-1 rounded-none p-0 flex flex-col items-center justify-center w-full gap-0 hover:bg-white transition-colors duration-300 ease-out ${isEvents ? "bg-white" : "bg-(--lightblue)"} border-0`,
                 tabEdge,
               )}
             >
@@ -556,26 +589,26 @@ export const Header = () => {
                 <Link
                   to="/events"
                   activeOptions={{ exact: true }}
-                  className="group flex flex-row h-[35px] items-center justify-center cursor-pointer outline-none"
+                  className={`group flex flex-row h-[35px] items-center justify-center cursor-pointer outline-none transition-colors duration-300 ease-out ${isEvents ? "text-(--orange)" : "text-black"}`}
                 >
-                  <EventTrackingIcon
-                    color={location.pathname == "/events" ? "var(--orange)" : "black"}
-                  />
-                  <div
-                    className={`text-sm font-bold text-end flex items-center pl-1 underline-offset-4 group-focus-visible:underline ${location.pathname == "/events" ? "text-(--orange)" : "text-black"}`}
-                  >
+                  {/* icon is currentColor, so it fades together with the label */}
+                  <EventTrackingIcon />
+                  <div className="text-sm font-bold text-end flex items-center pl-1 underline-offset-4 group-focus-visible:underline">
                     Event Tracking
                   </div>
                 </Link>
               </div>
               <div
-                className={`h-1 w-full bg-(--orange) ${location.pathname == "/events" ? "opacity-100" : "opacity-0"}`}
+                className={`h-1 w-full bg-(--orange) origin-center transition-[opacity,transform] duration-300 ease-out ${isEvents ? "opacity-100 scale-x-100" : "opacity-0 scale-x-0"}`}
               ></div>
             </Card>
           </div>
-          {location.pathname == "/events" ? (
+          <div
+            inert={!isEvents}
+            className={`${isEvents ? "flex" : "hidden xl:flex"} ${dataOptions ? "h-full" : "h-0"} xl:h-auto w-full min-w-0 overflow-hidden xl:overflow-visible xl:[clip-path:inset(0_-100vw_0_0)] col-start-1 col-end-4 xl:col-start-2 xl:col-end-3`}
+          >
             <div
-              className={`flex flex-col xl:flex-row ${dataOptions ? "h-full" : "h-0"} w-full col-start-1 col-end-4 xl:col-start-2 xl:col-end-3 `}
+              className={`flex flex-col xl:flex-row w-full xl:w-150 xl:shrink-0 ${slide} ${isEvents ? "xl:translate-x-0" : "xl:-translate-x-full"}`}
             >
               {calendarComponent}
               <Card className="rounded-none border-r-0 p-0 flex flex-col items-center justify-center gap-0 h-22 xl:h-14.75 w-full px-2">
@@ -687,15 +720,16 @@ export const Header = () => {
                 </Popover>
               </Card>
             </div>
-          ) : null}
+          </div>
           <div
+            ref={flTabRef}
             className={cn(
-              `relative z-1 xl:ml-1 w-full xl:w-auto h-14.75 flex col-start-2 row-start-1 border-r ${location.pathname == "/compare" || location.pathname == "/grid" ? "xl:col-start-2 xl:col-end-3" : location.pathname == "/events" ? "xl:col-start-3 xl:col-end-4" : "xl:col-start-2 xl:col-end-3"}`,
+              `relative z-1 xl:ml-1 w-full xl:w-auto h-14.75 flex col-start-2 row-start-1 border-r xl:col-start-3 xl:col-end-4`,
               tabEdge,
             )}
           >
             <Card
-              className={`shadow-none rounded-none xl:grow p-0 w-full h-full flex flex-col items-center justify-end gap-0 hover:bg-white transition-colors duration-200 ${location.pathname == "/compare" || location.pathname == "/grid" ? "bg-white" : "bg-(--lightblue)"} border-0`}
+              className={`shadow-none rounded-none xl:grow p-0 w-full h-full flex flex-col items-center justify-end gap-0 hover:bg-white transition-colors duration-300 ease-out ${isForward ? "bg-white" : "bg-(--lightblue)"} border-0`}
             >
               <div className="text-[11px] font-bold text-(--primaryblack-90)">
                 FORWARD LOOKING
@@ -707,21 +741,21 @@ export const Header = () => {
                     activeOptions={{ exact: true }}
                     className="group flex flex-col justify-end cursor-pointer w-full outline-none"
                   >
-                    <div className="flex flex-row h-8.75 items-center justify-center">
-                      <CompareIcon color={location.pathname === "/compare" ? "var(--orange)" : "black"} />
-                      <div
-                        className={`text-sm ${location.pathname === "/compare" ? "text-(--orange)" : "text-black"} font-bold text-end flex items-center pr-0.5 pl-1 underline-offset-4 group-focus-visible:underline`}
-                      >
+                    <div
+                      className={`flex flex-row h-8.75 items-center justify-center transition-colors duration-300 ease-out ${location.pathname === "/compare" ? "text-(--orange)" : "text-black"}`}
+                    >
+                      <CompareIcon />
+                      <div className="text-sm font-bold text-end flex items-center pr-0.5 pl-1 underline-offset-4 group-focus-visible:underline">
                         Compare
                       </div>
                     </div>
                     <div
-                      className={`h-1 bg-(--orange) ${location.pathname === "/compare" ? "opacity-100" : "opacity-0"}`}
+                      className={`h-1 bg-(--orange) origin-center transition-[opacity,transform] duration-300 ease-out ${location.pathname === "/compare" ? "opacity-100 scale-x-100" : "opacity-0 scale-x-0"}`}
                     ></div>
                   </Link>
                   <div className="h-full flex items-center">
                     <div
-                      className={`w-0.5 h-65/100 ${location.pathname === "/compare" || location.pathname === "/grid" ? "bg-(--primarygray-30)" : "bg-(--accentblue-60)"}`}
+                      className={`w-0.5 h-65/100 transition-colors duration-300 ease-out ${isForward ? "bg-(--primarygray-30)" : "bg-(--accentblue-60)"}`}
                     ></div>
                   </div>
                   <Link
@@ -729,16 +763,16 @@ export const Header = () => {
                     activeOptions={{ exact: true }}
                     className="group flex flex-col justify-end cursor-pointer w-full outline-none"
                   >
-                    <div className="flex flex-row h-8.75 items-center justify-center">
-                      <GridIcon color={location.pathname === "/grid" ? "var(--orange)" : "black"} />
-                      <div
-                        className={`text-sm ${location.pathname === "/grid" ? "text-(--orange)" : "text-black"} font-bold text-end flex items-center pl-1 pr-0.5 underline-offset-4 group-focus-visible:underline`}
-                      >
+                    <div
+                      className={`flex flex-row h-8.75 items-center justify-center transition-colors duration-300 ease-out ${location.pathname === "/grid" ? "text-(--orange)" : "text-black"}`}
+                    >
+                      <GridIcon />
+                      <div className="text-sm font-bold text-end flex items-center pl-1 pr-0.5 underline-offset-4 group-focus-visible:underline">
                         Grid
                       </div>
                     </div>
                     <div
-                      className={`h-1 bg-(--orange) ${location.pathname === "/grid" ? "opacity-100" : "opacity-0"}`}
+                      className={`h-1 bg-(--orange) origin-center transition-[opacity,transform] duration-300 ease-out ${location.pathname === "/grid" ? "opacity-100 scale-x-100" : "opacity-0 scale-x-0"}`}
                     ></div>
                   </Link>
                 </div>
@@ -755,9 +789,13 @@ export const Header = () => {
               <CloseIcon color="black" />
             </div>
           </button>
-          {location.pathname === "/compare" || location.pathname === "/grid" ? (
+          <div
+            ref={flFiltersRef}
+            inert={!isForward}
+            className={`isolate ${isForward ? "flex" : "hidden xl:flex"} ${dataOptions ? "h-full" : "h-0"} xl:h-14.75 min-w-0 overflow-hidden xl:overflow-visible xl:[clip-path:inset(0_-100vw_0_0)] w-full col-start-1 col-end-4 xl:col-start-4 xl:col-end-5`}
+          >
             <div
-              className={`isolate flex flex-col xl:flex-row xl:w-auto ${dataOptions ? "h-full" : "h-0"} xl:h-14.75 overflow-hidden w-full col-start-1 col-end-4 xl:col-start-3 xl:col-end-4 `}
+              className={`flex flex-col xl:flex-row w-full xl:w-150 xl:shrink-0 ${slide} ${isForward ? "xl:translate-x-0" : "xl:-translate-x-full"}`}
             >
               <Card
                 id="hazardExposure"
@@ -905,9 +943,10 @@ export const Header = () => {
                 </div>
               </Card>
             </div>
-          ) : null}
+          </div>
           <div
-            className={`overflow-hidden h-0 w-0 xl:h-auto xl:w-full flex justify-start`}
+            ref={explainerRef}
+            className={`overflow-hidden h-0 w-0 xl:h-auto xl:w-full flex justify-start xl:col-start-5`}
           >
             <button
               type="button"
