@@ -42,6 +42,7 @@ import {
   timePeriods,
 } from "@/config/datasets";
 import { isoCountries, eventTerritories, countryByIso3 } from "@/config/isoCountries";
+import { elninoExposures } from "@/config/elnino";
 
 import Hamburger from "../assets/Group 51.png";
 import Lockup from "../assets/geopulse-logo.svg";
@@ -56,9 +57,11 @@ import {
   DataExplainerIcon,
   DataOptionsIcon,
   EventTrackingIcon,
+  ElninoIcon,
   EventTypeIcon,
   GridIcon,
   HazardIcon,
+  LayersIcon,
   SmallChevron,
 } from "../assets/NavIcons";
 import { HazardExposureMenu, HazardExposureColumns } from "./HazardExposureMenu";
@@ -134,6 +137,7 @@ export const Header = () => {
   // out from / back behind their tab (desktop only; mobile keeps the stacked layout)
   const isEvents = location.pathname === "/events";
   const isForward = location.pathname === "/compare" || location.pathname === "/grid";
+  const isElnino = location.pathname === "/elnino";
   const slideEase = "xl:duration-500 xl:ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none";
   const slide = `xl:transition-transform ${slideEase}`;
 
@@ -143,6 +147,8 @@ export const Header = () => {
   const flTabRef = useRef<HTMLDivElement>(null);
   const flFiltersRef = useRef<HTMLDivElement>(null);
   const explainerRef = useRef<HTMLDivElement>(null);
+  const elTabRef = useRef<HTMLDivElement>(null);
+  const elFiltersRef = useRef<HTMLDivElement>(null);
   const lastLeft = useRef(new WeakMap<HTMLElement, number>());
   // true while the panels slide: only then (and on closed panels) are the clip-path and translate applied.
   // Popovers here are not portalled, and a transform or clip-path on an ancestor clips them,
@@ -153,7 +159,7 @@ export const Header = () => {
     const animate =
       window.matchMedia("(min-width: 80rem)").matches && // xl only
       !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    [flTabRef, flFiltersRef, explainerRef].forEach(({ current: el }) => {
+    [flTabRef, flFiltersRef, elTabRef, elFiltersRef, explainerRef].forEach(({ current: el }) => {
       if (!el) return;
       const left = el.offsetLeft;
       const prev = lastLeft.current.get(el);
@@ -184,6 +190,7 @@ export const Header = () => {
   const [countryFilterOpened, setCountryFilterOpened] =
     useState<boolean>(false);
   const [calendarOpened, setCalendarOpened] = useState<boolean>(false);
+  const [elninoExposureOpened, setElninoExposureOpened] = useState<boolean>(false);
   const [currentDatePreset, setCurrentDatePreset] =
     useState<string>("Last 3 months");
   const [temporaryDate, setTemporaryDate] = useState<any>({
@@ -615,7 +622,7 @@ export const Header = () => {
         </div>
       ) : (
         <div
-          className={`w-full xl:h-14.75 grid grid-cols-[1fr_1fr_50px] ${isEvents ? "xl:grid-cols-[180px_600px_245px_0px_1fr]" : isForward ? "xl:grid-cols-[180px_0px_300px_600px_1fr]" : "xl:grid-cols-[180px_0px_360px_0px_1fr]"} xl:col-start-2 xl:col-end-3`}
+          className={`w-full xl:h-14.75 grid grid-cols-[1fr_1fr_1fr_50px] ${isEvents ? "xl:grid-cols-[180px_600px_245px_0px_auto_0px_1fr]" : isForward ? "xl:grid-cols-[180px_0px_300px_600px_auto_0px_1fr]" : isElnino ? "xl:grid-cols-[180px_0px_300px_0px_auto_240px_1fr]" : "xl:grid-cols-[180px_0px_360px_0px_auto_0px_1fr]"} xl:col-start-2 xl:col-end-3`}
         >
           <div className="flex w-full xl:w-auto xl:ml-1 xl:col-start-1 xl:col-end-2">
             <Card
@@ -647,7 +654,7 @@ export const Header = () => {
           </div>
           <div
             inert={!isEvents}
-            className={`${isEvents ? "flex" : "hidden xl:flex"} ${dataOptions ? "h-full" : "h-0"} xl:h-auto w-full min-w-0 overflow-hidden xl:overflow-visible ${sliding || !isEvents ? "xl:[clip-path:inset(0_-100vw_0_0)]" : ""} col-start-1 col-end-4 xl:col-start-2 xl:col-end-3`}
+            className={`${isEvents ? "flex" : "hidden xl:flex"} ${dataOptions ? "h-full" : "h-0"} xl:h-auto w-full min-w-0 overflow-hidden xl:overflow-visible ${sliding || !isEvents ? "xl:[clip-path:inset(0_-100vw_0_0)]" : ""} col-start-1 col-end-5 xl:col-start-2 xl:col-end-3`}
           >
             <div
               className={`flex flex-col xl:flex-row w-full xl:w-150 xl:shrink-0 ${slide} ${isEvents ? "xl:translate-none" : "xl:-translate-x-full"}`}
@@ -824,7 +831,7 @@ export const Header = () => {
           <button
             type="button"
             aria-label="Close data options"
-            className="bg-(--lightblue) hover:bg-white w-full h-full col-start-3 row-start-1 flex justify-center items-center cursor-pointer xl:h-0 xl:w-0 xl:hidden outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#234E90]"
+            className="bg-(--lightblue) hover:bg-white w-full h-full col-start-4 row-start-1 flex justify-center items-center cursor-pointer xl:h-0 xl:w-0 xl:hidden outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#234E90]"
             onClick={() => setDataOptions(false)}
           >
             <div className=" flex items-center flex-center">
@@ -834,7 +841,7 @@ export const Header = () => {
           <div
             ref={flFiltersRef}
             inert={!isForward}
-            className={`isolate ${isForward ? "flex" : "hidden xl:flex"} ${dataOptions ? "h-full" : "h-0"} xl:h-14.75 min-w-0 overflow-hidden xl:overflow-visible ${sliding || !isForward ? "xl:[clip-path:inset(0_-100vw_0_0)]" : ""} w-full col-start-1 col-end-4 xl:col-start-4 xl:col-end-5`}
+            className={`isolate ${isForward ? "flex" : "hidden xl:flex"} ${dataOptions ? "h-full" : "h-0"} xl:h-14.75 min-w-0 overflow-hidden xl:overflow-visible ${sliding || !isForward ? "xl:[clip-path:inset(0_-100vw_0_0)]" : ""} w-full col-start-1 col-end-5 xl:col-start-4 xl:col-end-5`}
           >
             <div
               className={`flex flex-col xl:flex-row w-full xl:w-150 xl:shrink-0 ${slide} ${isForward ? "xl:translate-none" : "xl:-translate-x-full"}`}
@@ -1026,9 +1033,84 @@ export const Header = () => {
               </Card>
             </div>
           </div>
+          {/* El Niño tab: compact (icon over label) below 2xl, where the header has no room
+              for a full tab; full "SEASONAL / El Niño" card from 2xl */}
+          <div
+            ref={elTabRef}
+            className={cn(
+              "relative z-1 xl:ml-1 w-full xl:w-22 2xl:w-45 h-14.75 flex col-start-3 row-start-1 border-r xl:border-r-0 xl:col-start-5 xl:col-end-6",
+              tabEdge,
+            )}
+          >
+            <Card
+              className={`shadow-none rounded-none p-0 w-full h-full flex flex-col items-center justify-end gap-0 hover:bg-white transition-colors duration-300 ease-out ${isElnino ? "bg-white" : "bg-(--lightblue)"} border-0`}
+            >
+              <div className="xl:hidden 2xl:block text-[11px] font-bold text-(--primaryblack-90)">
+                SEASONAL
+              </div>
+              <Link
+                to="/elnino"
+                activeOptions={{ exact: true }}
+                className={`group flex flex-row xl:flex-col 2xl:flex-row h-8.75 xl:h-auto xl:grow 2xl:grow-0 2xl:h-8.75 items-center justify-center xl:gap-y-1 2xl:gap-y-0 w-full cursor-pointer outline-none transition-colors duration-300 ease-out ${isElnino ? "text-(--orange)" : "text-black"}`}
+              >
+                <ElninoIcon />
+                <span className="text-sm xl:text-xs 2xl:text-sm font-bold whitespace-nowrap pl-1 xl:pl-0 2xl:pl-1 underline-offset-4 group-focus-visible:underline">
+                  El Niño
+                </span>
+              </Link>
+              <div
+                className={`h-1 w-full bg-(--orange) origin-center transition-[opacity,transform] duration-300 ease-out ${isElnino ? "opacity-100 scale-x-100" : "opacity-0 scale-x-0"}`}
+              ></div>
+            </Card>
+          </div>
+          <div
+            ref={elFiltersRef}
+            inert={!isElnino}
+            className={`isolate ${isElnino ? "flex" : "hidden xl:flex"} ${dataOptions ? "h-full" : "h-0"} xl:h-14.75 min-w-0 overflow-hidden xl:overflow-visible ${sliding || !isElnino ? "xl:[clip-path:inset(0_-100vw_0_0)]" : ""} w-full col-start-1 col-end-5 xl:col-start-6 xl:col-end-7`}
+          >
+            <div
+              className={`flex flex-col xl:flex-row w-full xl:w-60 xl:shrink-0 ${slide} ${isElnino ? "xl:translate-none" : "xl:-translate-x-full"}`}
+            >
+              <Card
+                id="elninoExposure"
+                className="shadow-none rounded-none border-0 p-0 flex flex-col h-22 xl:h-auto w-full xl:w-60 px-2 items-center justify-center gap-0"
+              >
+                <div className="w-95/100 border-b-2">
+                  <Popover open={elninoExposureOpened} onOpenChange={setElninoExposureOpened}>
+                    <PopoverTrigger asChild>
+                      <button type="button" className="flex flex-row items-center justify-between w-95/100 h-14.75 text-left cursor-pointer outline-none underline-offset-4 focus-visible:underline">
+                        <div className="flex items-center">
+                          <LayersIcon />
+                          <div className="flex flex-col items-start pl-2">
+                            <div className="text-[11px] font-bold text-(--primaryblack-90)">EXPOSURE</div>
+                            <div className="text-[14px] font-bold">
+                              {elninoExposures[state?.elninoExposure as keyof typeof elninoExposures]?.label ??
+                                Object.values(elninoExposures)[0].label}
+                            </div>
+                          </div>
+                        </div>
+                        <CircleChevron open={elninoExposureOpened} />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-60 p-0 my-1.25 rounded-none shadow-[0_-10px_10px_-5px_rgba(0,0,0,0.1)]">
+                      <OptionList
+                        label="Exposure"
+                        value={state?.elninoExposure ?? ""}
+                        options={Object.entries(elninoExposures).map(([key, e]) => ({ value: key, label: e.label }))}
+                        onSelect={(key) => {
+                          actions?.setElninoExposure(key);
+                          setElninoExposureOpened(false);
+                        }}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </Card>
+            </div>
+          </div>
           <div
             ref={explainerRef}
-            className={`overflow-hidden h-0 w-0 xl:h-auto xl:w-full flex justify-start xl:col-start-5`}
+            className={`overflow-hidden h-0 w-0 xl:h-auto xl:w-full flex justify-start xl:col-start-7`}
           >
             <button
               type="button"

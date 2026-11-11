@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as CompareRouteImport } from './routes/compare'
 import { Route as DatamethodologyRouteImport } from './routes/datamethodology'
+import { Route as ElninoRouteImport } from './routes/elnino'
 import { Route as EventsRouteImport } from './routes/events'
 import { Route as GridRouteImport } from './routes/grid'
 import { Route as HomeRouteImport } from './routes/home'
@@ -36,6 +37,11 @@ const CompareRoute = CompareRouteImport.update({
 const DatamethodologyRoute = DatamethodologyRouteImport.update({
   id: '/datamethodology',
   path: '/datamethodology',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ElninoRoute = ElninoRouteImport.update({
+  id: '/elnino',
+  path: '/elnino',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EventsRoute = EventsRouteImport.update({
@@ -64,6 +70,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/compare': typeof CompareRoute
   '/datamethodology': typeof DatamethodologyRoute
+  '/elnino': typeof ElninoRoute
   '/events': typeof EventsRoute
   '/grid': typeof GridRoute
   '/home': typeof HomeRoute
@@ -74,6 +81,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/compare': typeof CompareRoute
   '/datamethodology': typeof DatamethodologyRoute
+  '/elnino': typeof ElninoRoute
   '/events': typeof EventsRoute
   '/grid': typeof GridRoute
   '/home': typeof HomeRoute
@@ -85,6 +93,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/compare': typeof CompareRoute
   '/datamethodology': typeof DatamethodologyRoute
+  '/elnino': typeof ElninoRoute
   '/events': typeof EventsRoute
   '/grid': typeof GridRoute
   '/home': typeof HomeRoute
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/compare'
     | '/datamethodology'
+    | '/elnino'
     | '/events'
     | '/grid'
     | '/home'
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/compare'
     | '/datamethodology'
+    | '/elnino'
     | '/events'
     | '/grid'
     | '/home'
@@ -117,6 +128,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/compare'
     | '/datamethodology'
+    | '/elnino'
     | '/events'
     | '/grid'
     | '/home'
@@ -128,6 +140,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   CompareRoute: typeof CompareRoute
   DatamethodologyRoute: typeof DatamethodologyRoute
+  ElninoRoute: typeof ElninoRoute
   EventsRoute: typeof EventsRoute
   GridRoute: typeof GridRoute
   HomeRoute: typeof HomeRoute
@@ -162,6 +175,13 @@ declare module '@tanstack/react-router' {
       path: '/datamethodology'
       fullPath: '/datamethodology'
       preLoaderRoute: typeof DatamethodologyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/elnino': {
+      id: '/elnino'
+      path: '/elnino'
+      fullPath: '/elnino'
+      preLoaderRoute: typeof ElninoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/events': {
@@ -200,6 +220,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   CompareRoute: CompareRoute,
   DatamethodologyRoute: DatamethodologyRoute,
+  ElninoRoute: ElninoRoute,
   EventsRoute: EventsRoute,
   GridRoute: GridRoute,
   HomeRoute: HomeRoute,

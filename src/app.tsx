@@ -47,6 +47,7 @@ type AppState = {
   dataExplainerOpen: boolean;
   dataExplainerView: string;
   loadingOverlay: boolean | string;
+  elninoExposure: string;
 };
 
 // this object sets types for the set state actions
@@ -65,6 +66,7 @@ type AppActions = {
   setDataExplainerState: Dispatch<SetStateAction<boolean>>;
   setDataExplainerView: Dispatch<SetStateAction<string>>;
   setLoadingOverlay: Dispatch<SetStateAction<boolean | string>>;
+  setElninoExposure: Dispatch<SetStateAction<string>>;
 };
 
 // create context for state values and set state actions
@@ -108,6 +110,8 @@ export function App() {
   const [dataExplainerOpen, setDataExplainerState] = useState(false);
   const [dataExplainerView, setDataExplainerView] = useState("Event Tracking");
   const [loadingOverlay, setLoadingOverlay] = useState<string | boolean>(true);
+  // El Niño tab: exposure layer, chosen in the header (keys of elninoExposures)
+  const [elninoExposure, setElninoExposure] = useState<string>("agrgva");
 
   const state = {
     currentView,
@@ -124,6 +128,7 @@ export function App() {
     dataExplainerOpen,
     dataExplainerView,
     loadingOverlay,
+    elninoExposure,
   };
 
   const actions = {
@@ -141,6 +146,7 @@ export function App() {
     setDataExplainerState,
     setDataExplainerView,
     setLoadingOverlay,
+    setElninoExposure,
   };
 
   return (
