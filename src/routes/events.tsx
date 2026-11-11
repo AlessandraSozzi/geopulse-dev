@@ -201,6 +201,12 @@ function Events() {
   const exposureLayerForGroup = useRef<any>(null);
   const unweightedEventLayer = useRef<GraphicsLayer>(null);
   const weightedEventLayer = useRef<GraphicsLayer>(null);
+  // cyclone tracks and epicentres (geopulse_episodes layers 1 and 2) for the focused event
+  const trackLayer = useRef<GraphicsLayer>(null);
+  // points + lines of the focused event, grouped by episodeid (drawn with the matching polygons)
+  const trackByEpisode = useRef<Record<number, any[]>>({});
+  // interval that turns the cyclone current-position marker
+  const spinTimer = useRef<number | null>(null);
   const groupLayer = useRef<GroupLayer>(null);
 
   useEffect(() => {
@@ -326,9 +332,11 @@ function Events() {
   }, []);
 
   // gdacs event polygon feature layer
-  const eventPolygonsLayer = new FeatureLayer({
-    url: "https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/geopulse_episodes/FeatureServer",
-  });
+  const EPISODES_URL =
+    "https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/geopulse_episodes/FeatureServer";
+  const eventPolygonsLayer = new FeatureLayer({ url: EPISODES_URL }); // layer 0: polygons
+  const eventPointsLayer = new FeatureLayer({ url: `${EPISODES_URL}/1` }); // epicentres, track points
+  const eventLinesLayer = new FeatureLayer({ url: `${EPISODES_URL}/2` }); // cyclone track lines
 
   // country exposures feature layer
   const countryExposures = new FeatureLayer({
@@ -363,9 +371,12 @@ function Events() {
         title: "outline",
       });
 
+      // graphics layer for the episode's track line and points (above the polygon outlines)
+      trackLayer.current = new GraphicsLayer({ title: "track" });
+
       // group layer that will only be shown when an event is in focus
       groupLayer.current = new GroupLayer({
-        layers: [unweightedEventLayer.current, weightedEventLayer.current],
+        layers: [unweightedEventLayer.current, weightedEventLayer.current, trackLayer.current],
       });
 
       // assign the layers to the map class
@@ -546,6 +557,9 @@ function Events() {
       }
       unweightedEventLayer.current.graphics.removeAll(); // remove graphics from graphics layers
       weightedEventLayer.current.graphics.removeAll();
+      trackLayer.current?.graphics.removeAll();
+      trackByEpisode.current = {};
+      stopSpin();
       setFocusedFeatures(null); // reset focused features in state
       setFocusedSliderValue([0]); // reset focused slider value
     }
@@ -864,11 +878,24 @@ function Events() {
     newQuery.outFields = ["*"];
     newQuery.where = `eventid = ${eventid}`;
 
+    // points and lines are optional extras: if their query fails the polygons still show
+    const extrasQuery = { where: `eventid = ${eventid}`, outFields: ["*"], returnGeometry: true };
+
     function runQuery() {
-      eventPolygonsLayer
-        .queryFeatures(newQuery)
-        .then((result) => {
+      Promise.all([
+        eventPolygonsLayer.queryFeatures(newQuery),
+        eventPointsLayer.queryFeatures(extrasQuery).catch(() => null),
+        eventLinesLayer.queryFeatures(extrasQuery).catch(() => null),
+      ])
+        .then(([result, points, lines]) => {
           console.log("events: ", result);
+
+          // lines first so points draw on top of them
+          const grouped: Record<number, any[]> = {};
+          for (const f of [...(lines?.features ?? []), ...(points?.features ?? [])]) {
+            (grouped[f.attributes.episodeid] ??= []).push(f);
+          }
+          trackByEpisode.current = grouped;
 
           const ascendingFeatures = Object.values(
             result.features.reduce(
@@ -890,7 +917,8 @@ function Events() {
           console.log("FocusedFeatures: ", ascendingFeatures);
 
           let combinedExtent: __esri.Extent | null = null;
-          for (const feature of result.features) {
+          // fit polygons and the track, so a cyclone's whole path is in view
+          for (const feature of [...result.features, ...(lines?.features ?? [])]) {
             const ext = feature.geometry?.extent;
             console.log(
               "feature element extent: ",
@@ -915,6 +943,110 @@ function Events() {
     }
     runQuery();
   }
+
+  // spinning tropical-cyclone marker for the current position (CIM rotation animation, ArcGIS 5)
+  const cycloneSymbol = (color: number[], southern: boolean) => {
+    // quadratic bezier sampled to points
+    const bez = (p0: number[], c: number[], p1: number[], n = 12) =>
+      Array.from({ length: n + 1 }, (_, i) => {
+        const t = i / n, u = 1 - t;
+        return [u * u * p0[0] + 2 * u * t * c[0] + t * t * p1[0], u * u * p0[1] + 2 * u * t * c[1] + t * t * p1[1]];
+      });
+    const circle = (r: number, n = 32) =>
+      Array.from({ length: n + 1 }, (_, i) => [r * Math.cos((-2 * Math.PI * i) / n), r * Math.sin((-2 * Math.PI * i) / n)]);
+    // top arm sweeps from the left of the disk over to the right; bottom arm is its 180° copy
+    const arm = [...bez([-6, 1], [-6, 11], [9, 11]), ...bez([9, 11], [2, 8], [5, 3]).slice(1), [-6, 1]];
+    let rings = [circle(6), arm, arm.map(([x, y]) => [-x, -y])];
+    // southern hemisphere: mirrored glyph (and reversed ring order to keep it clockwise)
+    if (southern) rings = rings.map((r) => r.map(([x, y]) => [-x, y]).reverse());
+
+    const spiral = (layer: any) => ({
+      type: "CIMVectorMarker", enable: true, size: 26, rotation: 0,
+      frame: { xmin: -12, ymin: -12, xmax: 12, ymax: 12 },
+      markerGraphics: rings.map((ring) => ({
+        type: "CIMMarkerGraphic", geometry: { rings: [ring] },
+        symbol: { type: "CIMPolygonSymbol", symbolLayers: [layer] },
+      })),
+    });
+
+    return {
+      type: "cim",
+      data: {
+        type: "CIMSymbolReference",
+        symbol: {
+          type: "CIMPointSymbol",
+          // first layer draws on top
+          symbolLayers: [
+            { // centre dot in the event colour
+              type: "CIMVectorMarker", enable: true, size: 7,
+              frame: { xmin: -5, ymin: -5, xmax: 5, ymax: 5 },
+              markerGraphics: [{
+                type: "CIMMarkerGraphic", geometry: { rings: [circle(5)] },
+                symbol: { type: "CIMPolygonSymbol", symbolLayers: [
+                  { type: "CIMSolidStroke", enable: true, width: 0.75, color: [255, 255, 255, 255] },
+                  { type: "CIMSolidFill", enable: true, color: [...color, 255] },
+                ] },
+              }],
+            },
+            spiral({ type: "CIMSolidFill", enable: true, color: [30, 30, 30, 255] }),
+            // white halo under the fill = outline only on the outer edge
+            spiral({ type: "CIMSolidStroke", enable: true, width: 2, color: [255, 255, 255, 230] }),
+          ],
+        },
+      },
+    };
+  };
+
+  // turn the cyclone marker: 36 copies rotated 10° apart, swapped every 50 ms (one turn per 1.8 s).
+  // ArcGIS CIM rotation animations don't render on this GraphicsLayer, so it's driven from JS.
+  const stopSpin = () => {
+    if (spinTimer.current) clearInterval(spinTimer.current);
+    spinTimer.current = null;
+  };
+  const startSpin = (g: any) => {
+    stopSpin();
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const step = (g.geometry?.latitude ?? 0) < 0 ? -10 : 10; // SH clockwise, NH counter-clockwise
+    const base = JSON.stringify(g.symbol.data);
+    const frames: any[] = Array.from({ length: 36 }, (_, i) => {
+      const d = JSON.parse(base);
+      d.symbol.symbolLayers.slice(1).forEach((l: any) => (l.rotation = step * i)); // spiral layers, not the dot
+      return { type: "cim", data: d };
+    });
+    let k = 0;
+    spinTimer.current = window.setInterval(() => {
+      g.symbol = frames[k];
+      frames[k] = g.symbol; // keep the built symbol so each frame is only created once
+      k = (k + 1) % frames.length;
+    }, 50);
+  };
+  useEffect(() => stopSpin, []); // stop on unmount
+
+  // symbols for geopulse_episodes points (layer 1) and lines (layer 2)
+  const trackSymbol = (a: any, geom?: any): any => {
+    // same RGB as the event markers (eventColor)
+    const typeColors: Record<string, number[]> = {
+      EQ: [101, 141, 27], TC: [218, 41, 28], DR: [128, 49, 167],
+      FL: [0, 176, 185], VO: [242, 169, 0], WF: [255, 130, 0],
+    };
+    const typeColor = typeColors[a.eventtype] ?? [217, 217, 217];
+    switch (a.role) {
+      case "track_line":
+        return { type: "simple-line", color: [255, 255, 255, 0.8], width: 1.5 };
+      case "track_point":
+        return a.forecast == 1
+          ? // forecast positions: hollow rings
+            { type: "simple-marker", size: 6, color: [0, 0, 0, 0], outline: { color: [255, 255, 255, 0.9], width: 1.2 } }
+          : // past positions: small solid dots
+            { type: "simple-marker", size: 4, color: [255, 255, 255, 0.9], outline: null };
+      case "track_current":
+        return a.eventtype === "TC"
+          ? cycloneSymbol(typeColor, (geom?.latitude ?? geom?.y ?? 0) < 0)
+          : { type: "simple-marker", size: 11, color: typeColor, outline: { color: "white", width: 1.5 } };
+      default: // epicentre
+        return { type: "simple-marker", size: 10, color: typeColor, outline: { color: "white", width: 2 } };
+    }
+  };
 
   const applyPolygon = (features: any) => {
     console.log("sS: ", features);
@@ -969,6 +1101,21 @@ function Events() {
         polygonStyle(x);
         // }
       });
+
+      // track line and points of the same episode
+      trackLayer.current?.graphics.removeAll();
+      stopSpin();
+      const episode = features[0]?.attributes?.episodeid;
+      const order = (a: any) =>
+        a.role === "track_line" ? 0 : a.role === "track_point" ? 1 : 2; // current/epicentre on top
+      [...(trackByEpisode.current[episode] ?? [])]
+        .sort((a, b) => order(a.attributes) - order(b.attributes))
+        .forEach((f: any) => {
+          const g = f.clone();
+          g.symbol = trackSymbol(f.attributes, f.geometry);
+          trackLayer.current?.graphics.add(g);
+          if (f.attributes.role === "track_current" && f.attributes.eventtype === "TC") startSpin(g);
+        });
 
       baseLayer.current.effect = "blur(6px) brightness(0.7) grayscale(0.8)"; // blur, darken, and greyscale map base layer
       exposureLayer.current.effect = "blur(6px) brightness(0.7) grayscale(0.8)"; // blur, darken, and greyscale map exposure layer
