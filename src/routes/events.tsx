@@ -1294,42 +1294,51 @@ function Events() {
   };
 
   const sectorSubComponent = (exposure: string) => {
+    const cfg = realtimeObject[exposure];
+    // record for the selected country tab ("ALL" = event total)
+    const rec = focusedCountryExposures?.find(
+      (c: any) => c.attributes.areaid == currentCountryExposure,
+    )?.attributes;
+
     return (
       <div className="rounded-xl bg-[#F4F7FB] flex flex-col items-start px-2 pt-3 mb-3.5">
         <div className="font-bold text-[10px] text-left text-[#6B7A90]">
           BY SECTOR
         </div>
         <div className="flex items-start justify-between py-3 gap-2 w-full">
-          {realtimeObject[exposure].categories.map((x) => (
-            <div className="flex flex-col items-start self-stretch gap-3 w-full">
-              <div className="flex flex-col items-center gap-1">
-                {/* <svg></svg> */}
+          {cfg.categories.map((x) => {
+            const attr = cfg.categoryAttributes?.[x];
+            const value = attr ? rec?.[attr] : undefined;
+            const pct = attr ? rec?.[attr + "_pct"] : undefined;
+            return (
+              <div key={x} className="flex flex-col items-start self-stretch gap-3 w-full">
                 <span className="font-bold text-[11px] text-left text-[#4A5A70]">
                   {subLayerLabel(exposure, x)}
                 </span>
-              </div>
-              <span className="text-[#0B1B33] text-[17px] font-bold">N/A</span>
-              {/* bar row: collapsed for Total, slides open for a country (same as the other blocks).
-                  TODO: sector values and bar widths are placeholders (N/A, fixed 25%) until sector data is wired up */}
-              <div
-                className={`-mt-3 grid w-full transition-[grid-template-rows,opacity] duration-300 ease-out ${currentCountryExposure !== "ALL" ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}
-              >
-                <div className="min-h-0 overflow-hidden">
-                  <div className="mt-3 flex w-full gap-1.5 items-center">
-                    <div className="bg-[#E3E9F1] rounded-xl h-1 w-full flex item-stretch items-start">
-                      <div
-                        className="bg-black rounded-xl h-full transition-[width] duration-500 ease-out"
-                        style={{ width: `25%` }}
-                      ></div>
+                <span className="text-[#0B1B33] text-[17px] font-bold">
+                  {value != null ? `$${fmt.format(value)}` : "N/A"}
+                </span>
+                {/* bar: % of the country's national GDP in this sector; collapsed for Total */}
+                <div
+                  className={`-mt-3 grid w-full transition-[grid-template-rows,opacity] duration-300 ease-out ${currentCountryExposure !== "ALL" ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}
+                >
+                  <div className="min-h-0 overflow-hidden">
+                    <div className="mt-3 flex w-full gap-1.5 items-center">
+                      <div className="bg-[#E3E9F1] rounded-xl h-1 w-full flex items-start">
+                        <div
+                          className="bg-black rounded-xl h-full transition-[width] duration-500 ease-out"
+                          style={{ width: `${Math.min(pct ?? 0, 100)}%` }}
+                        />
+                      </div>
+                      <span className="text-black text-[10px] font-bold">
+                        {pct != null ? `${fmt.format(pct)}%` : "N/A"}
+                      </span>
                     </div>
-                    <span className="text-black text-[10px] font-bold">
-                      N/A
-                    </span>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     );
