@@ -41,7 +41,7 @@ import {
   eventTypes,
   timePeriods,
 } from "@/config/datasets";
-import { isoCountries, countryByIso3 } from "@/config/isoCountries";
+import { isoCountries, eventTerritories, countryByIso3 } from "@/config/isoCountries";
 
 import Hamburger from "../assets/Group 51.png";
 import Lockup from "../assets/geopulse-logo.svg";
@@ -730,7 +730,7 @@ export const Header = () => {
                               )}
                             />
                           </CommandItem>
-                          {isoCountries
+                          {[...isoCountries, ...eventTerritories]
                             .sort((a, b) => a.name.localeCompare(b.name))
                             .map((country) => (
                               <CommandItem

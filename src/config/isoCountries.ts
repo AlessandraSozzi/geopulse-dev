@@ -200,6 +200,20 @@ export type CountryString = {
   name: string;
 };
 
-export const countryByIso3 = Object.fromEntries(
-  isoCountries.map(({ iso3, name }) => [iso3, name]),
+// Territories that appear in event data (affectedcountries) but not in isoCountries.
+// Kept separate so they show in Events (chips, country filter) without being offered in
+// the Compare country picker, which may have no data for them.
+export const eventTerritories: CountryString[] = [
+  { iso3: "CPV", name: "Cabo Verde" },
+  { iso3: "GUM", name: "Guam" },
+  { iso3: "HKG", name: "Hong Kong SAR" },
+  { iso3: "MNP", name: "Northern Mariana Islands" },
+  { iso3: "MUS", name: "Mauritius" },
+  { iso3: "NCL", name: "New Caledonia" },
+  { iso3: "REU", name: "Réunion" },
+  { iso3: "TON", name: "Tonga" },
+];
+
+export const countryByIso3: Record<string, string> = Object.fromEntries(
+  [...isoCountries, ...eventTerritories].map(({ iso3, name }) => [iso3, name]),
 );

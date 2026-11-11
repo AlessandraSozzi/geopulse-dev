@@ -241,7 +241,7 @@ function Events() {
               if (i.attributes.eventid == a.graphic.attributes.eventid) {
                 view.current.openPopup({
                   location: i.geometry,
-                  title: i.attributes.description,
+                  title: i.attributes.eventname,
                 });
                 return;
               }
@@ -1638,12 +1638,12 @@ function Events() {
               )
               ?.map((event: any) => (
                 <div
-                  key={event.attributes.htmldescription}
+                  key={event.attributes.eventid}
                   className="flex flex-col gap-1.5 py-4 px-5 border-b border-gray-300 items-start flex flex-col text-left"
                 >
                   <h3 className="w-full flex items-start justify-between font-bold text-[10px] text-[#6B7A90] tracking-[1px]">
                     <div className="w-55">
-                      {event.attributes.country.toUpperCase()}
+                      {(event.attributes.affectedcountries_display ?? "").toUpperCase()}
                     </div>
                     {event.attributes.iscurrent == 1 ? (
                       <div className="flex justify-center items-center text-(--red) gap-1.5 font-bold px-[5px] text-[11px]">
@@ -1656,7 +1656,7 @@ function Events() {
                     ) : null}
                   </h3>
                   <h3 className="font-bold text-[16px] text-(--fundblue)">
-                    {event.attributes.description}
+                    {event.attributes.eventname}
                   </h3>
                   <p className="text-[14px] flex items-center">
                     <svg
@@ -1785,7 +1785,7 @@ function Events() {
               </div>
             </div>
             <div className="text-[26px] text-left text-white font-bold w-9/10">
-              {focusedEvent.description}
+              {focusedEvent.eventname}
             </div>
             <p className="text-[14px] flex items-center text-white">
               <svg
@@ -2046,7 +2046,7 @@ function Events() {
                             }}
                           >
                             <div className="[text-box:trim-both_cap_alphabetic]">
-                              {countryByIso3[a]}
+                              {countryByIso3[a] ?? a}
                             </div>
                           </div>
                         );
@@ -2071,7 +2071,7 @@ function Events() {
                           >
                             <span className="max-w-40 truncate [text-box:trim-both_cap_alphabetic]">
                               {hiddenSelected
-                                ? countryByIso3[currentCountryExposure]
+                                ? (countryByIso3[currentCountryExposure] ?? currentCountryExposure)
                                 : `+${hidden.length} more`}
                             </span>
                             <svg
