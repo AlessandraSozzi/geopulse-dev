@@ -153,6 +153,8 @@ function Events() {
   const [focusedEvent, setFocusedEvent] = useState<any>("");
   const [eventsList, setEventsList] = useState<boolean>(false);
   const [eventPopup, setEventPopup] = useState<string>("all events");
+  // event list panel folded to its blue header (desktop only)
+  const [eventsCollapsed, setEventsCollapsed] = useState(false);
   const [focusedFeatures, setFocusedFeatures] = useState<any>(null);
   const [focusedSliderValue, setFocusedSliderValue] = useState<number[]>([0]);
   const [focusedSliderPlaying, setFocusedSliderPlaying] =
@@ -1558,7 +1560,7 @@ function Events() {
           </div>
         </div>
         <div
-          className={`absolute z-2 bottom-65 md:bottom-2 rounded-lg rounded-t-xl md:transition-[right] md:duration-600 md:ease-in-out ${eventPopup == "all events" ? "md:right-2" : "md:-right-100 invisible"} md:visible max-h-full md:h-85/100 w-full md:w-[350px] flex flex-col bg-white cursor-default draggable`}
+          className={`absolute z-2 bottom-65 md:bottom-2 rounded-lg rounded-t-xl md:transition-[right] md:duration-600 md:ease-in-out ${eventPopup == "all events" ? "md:right-2" : "md:-right-100 invisible"} md:visible max-h-full md:h-85/100 w-full md:w-[350px] flex flex-col cursor-default draggable ${eventsCollapsed ? "md:pointer-events-none" : ""}`}
           style={{
             "--drag-y": `${y}px`,
             touchAction: "none",
@@ -1569,7 +1571,9 @@ function Events() {
             onPointerMove={onPointerMove}
             onPointerUp={(e) => onPointerUp(e)}
           >
-            <div className="rounded-t-lg px-5 py-4 shadow-[0px_4px_5.8px_0px_#00000024] bg-(--accentdarkblue-100) text-white flex flex-row items-center justify-between">
+            <div
+              className={`pointer-events-auto px-5 py-4 shadow-[0px_4px_5.8px_0px_#00000024] bg-(--accentdarkblue-100) text-white flex flex-row items-center justify-between transition-[border-radius] duration-300 ${eventsCollapsed ? "rounded-lg" : "rounded-t-lg"}`}
+            >
               <div className="w-full flex flex-col items-start justify-center">
                 <div className="h-4 w-full flex items-end justify-center md:hidden">
                   <div className="w-15 h-1 bg-(--accentcoolgray-60) rounded-xl"></div>
@@ -1583,20 +1587,28 @@ function Events() {
                       ? ""
                       : ` in ${countryByIso3[state?.countryFilter]}`}
                   </b>
-                  <div className="h-8 w-8 bg-[#FFFFFF24] rounded-full flex items-center justify-center">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="14"
-                      height="14"
-                      viewBox="0 0 14 14"
-                      fill="white"
-                    >
-                      <path
-                        d="M2.1001 6.9999C2.1001 6.8039 2.2541 6.6499 2.4501 6.6499H11.5501C11.6429 6.6499 11.7319 6.68678 11.7976 6.75241C11.8632 6.81805 11.9001 6.90708 11.9001 6.9999C11.9001 7.09273 11.8632 7.18175 11.7976 7.24739C11.7319 7.31303 11.6429 7.3499 11.5501 7.3499H2.4501C2.35727 7.3499 2.26825 7.31303 2.20261 7.24739C2.13697 7.18175 2.1001 7.09273 2.1001 6.9999Z"
-                        fill="#FFFFFF"
+                  <button
+                    type="button"
+                    aria-expanded={!eventsCollapsed}
+                    aria-label={eventsCollapsed ? "Expand event list" : "Collapse event list"}
+                    onPointerDown={(e) => e.stopPropagation()} // don't start the mobile drag
+                    onClick={() => setEventsCollapsed((c) => !c)}
+                    className="hidden md:flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#FFFFFF24] cursor-pointer transition-colors hover:bg-[#FFFFFF40] focus-visible:outline-2 focus-visible:outline-white"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden>
+                      <rect x="2.1" y="6.65" width="9.8" height="0.7" rx="0.35" fill="white" />
+                      {/* vertical bar: grows from the minus into a plus when collapsed */}
+                      <rect
+                        x="6.65"
+                        y="2.1"
+                        width="0.7"
+                        height="9.8"
+                        rx="0.35"
+                        fill="white"
+                        className={`origin-center [transform-box:fill-box] transition-transform duration-300 ease-out motion-reduce:transition-none ${eventsCollapsed ? "scale-y-100" : "scale-y-0"}`}
                       />
                     </svg>
-                  </div>
+                  </button>
                 </div>
                 <div className="text-[12px]">
                   {
@@ -1622,6 +1634,11 @@ function Events() {
               </div>
             </div>
           </div>
+          {/* list folds away (0fr) when collapsed, leaving only the blue header */}
+          <div
+            className={`grid min-h-0 flex-1 transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none ${eventsCollapsed ? "md:grid-rows-[0fr]" : "grid-rows-[1fr]"}`}
+          >
+          <div className="min-h-0 overflow-hidden rounded-b-lg bg-white">
           <div
             className="h-full pb-20 md:pb-0 overflow-y-scroll flex flex-col justify-start"
             ref={eventRef}
@@ -1720,6 +1737,8 @@ function Events() {
                   </div>
                 </div>
               ))}
+          </div>
+          </div>
           </div>
         </div>
         <div
