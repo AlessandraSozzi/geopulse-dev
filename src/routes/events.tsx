@@ -11,6 +11,7 @@ import {
   useLayoutEffect,
   useCallback,
   useContext,
+  type ReactNode,
 } from "react";
 
 // this function constructs className strings conditionally and merges tailwindcss classes in javascript
@@ -84,6 +85,18 @@ import SimpleMarkerSymbol from "@arcgis/core/symbols/SimpleMarkerSymbol";
 // dataset object configurations
 import { realtimeObject, eventTypes, subLayerLabel } from "@/config/datasets";
 import { countryByIso3 } from "@/config/isoCountries";
+import {
+  HATCHED_ROLES,
+  HAZARD_LABELS,
+  LEGEND_PATHS,
+  TYPE_COLORS,
+  dateLabelSymbol,
+  episodeSymbol,
+  eventKeys,
+  hatchedArea,
+  labelledPoints,
+  spinFrames,
+} from "@/lib/eventSymbols";
 
 //import loading overlay component
 import LoadingOverlay from "@/components/loadingOverlay";
@@ -97,6 +110,16 @@ const searchSchema = z.object({
     .catch(0)
     .transform((val) => (val === 0 ? undefined : val)),
 });
+
+// one row of the selected-event map key: symbol + label
+function KeyRow({ label, children }: { label: ReactNode; children: ReactNode }) {
+  return (
+    <li className="flex items-center gap-2.5">
+      <span className="flex size-5 shrink-0 items-center justify-center">{children}</span>
+      <span className="text-[12px] text-white">{label}</span>
+    </li>
+  );
+}
 
 // Layer icon for the legend title. The config icons are drawn at different sizes
 // (≈16–21 units), so the viewBox is fitted to each path's own bounds after it renders:
@@ -156,6 +179,9 @@ function Events() {
   // event list panel folded to its blue header (desktop only)
   const [eventsCollapsed, setEventsCollapsed] = useState(false);
   const [focusedFeatures, setFocusedFeatures] = useState<any>(null);
+  // map key for the selected event (null = no event open) and the event whose key the user closed
+  const [keys, setKeys] = useState<ReturnType<typeof eventKeys> | null>(null);
+  const [keyClosedFor, setKeyClosedFor] = useState<number | null>(null);
   const [focusedSliderValue, setFocusedSliderValue] = useState<number[]>([0]);
   const [focusedSliderPlaying, setFocusedSliderPlaying] =
     useState<boolean>(false);
@@ -561,6 +587,7 @@ function Events() {
       trackByEpisode.current = {};
       stopSpin();
       setFocusedFeatures(null); // reset focused features in state
+      setKeys(null); // hide the map key
       setFocusedSliderValue([0]); // reset focused slider value
     }
   };
@@ -914,6 +941,7 @@ function Events() {
           console.log("feature ", result.features);
 
           setFocusedFeatures(ascendingFeatures); // Store the features in state
+          setKeys(eventKeys(result.features, [...(lines?.features ?? []), ...(points?.features ?? [])]));
           console.log("FocusedFeatures: ", ascendingFeatures);
 
           let combinedExtent: __esri.Extent | null = null;
@@ -944,75 +972,15 @@ function Events() {
     runQuery();
   }
 
-  // spinning tropical-cyclone marker for the current position (CIM rotation animation, ArcGIS 5)
-  const cycloneSymbol = (color: number[], southern: boolean) => {
-    // quadratic bezier sampled to points
-    const bez = (p0: number[], c: number[], p1: number[], n = 12) =>
-      Array.from({ length: n + 1 }, (_, i) => {
-        const t = i / n, u = 1 - t;
-        return [u * u * p0[0] + 2 * u * t * c[0] + t * t * p1[0], u * u * p0[1] + 2 * u * t * c[1] + t * t * p1[1]];
-      });
-    const circle = (r: number, n = 32) =>
-      Array.from({ length: n + 1 }, (_, i) => [r * Math.cos((-2 * Math.PI * i) / n), r * Math.sin((-2 * Math.PI * i) / n)]);
-    // top arm sweeps from the left of the disk over to the right; bottom arm is its 180° copy
-    const arm = [...bez([-6, 1], [-6, 11], [9, 11]), ...bez([9, 11], [2, 8], [5, 3]).slice(1), [-6, 1]];
-    let rings = [circle(6), arm, arm.map(([x, y]) => [-x, -y])];
-    // southern hemisphere: mirrored glyph (and reversed ring order to keep it clockwise)
-    if (southern) rings = rings.map((r) => r.map(([x, y]) => [-x, y]).reverse());
-
-    const spiral = (layer: any) => ({
-      type: "CIMVectorMarker", enable: true, size: 26, rotation: 0,
-      frame: { xmin: -12, ymin: -12, xmax: 12, ymax: 12 },
-      markerGraphics: rings.map((ring) => ({
-        type: "CIMMarkerGraphic", geometry: { rings: [ring] },
-        symbol: { type: "CIMPolygonSymbol", symbolLayers: [layer] },
-      })),
-    });
-
-    return {
-      type: "cim",
-      data: {
-        type: "CIMSymbolReference",
-        symbol: {
-          type: "CIMPointSymbol",
-          // first layer draws on top
-          symbolLayers: [
-            { // centre dot in the event colour
-              type: "CIMVectorMarker", enable: true, size: 7,
-              frame: { xmin: -5, ymin: -5, xmax: 5, ymax: 5 },
-              markerGraphics: [{
-                type: "CIMMarkerGraphic", geometry: { rings: [circle(5)] },
-                symbol: { type: "CIMPolygonSymbol", symbolLayers: [
-                  { type: "CIMSolidStroke", enable: true, width: 0.75, color: [255, 255, 255, 255] },
-                  { type: "CIMSolidFill", enable: true, color: [...color, 255] },
-                ] },
-              }],
-            },
-            spiral({ type: "CIMSolidFill", enable: true, color: [30, 30, 30, 255] }),
-            // white halo under the fill = outline only on the outer edge
-            spiral({ type: "CIMSolidStroke", enable: true, width: 2, color: [255, 255, 255, 230] }),
-          ],
-        },
-      },
-    };
-  };
-
-  // turn the cyclone marker: 36 copies rotated 10° apart, swapped every 50 ms (one turn per 1.8 s).
-  // ArcGIS CIM rotation animations don't render on this GraphicsLayer, so it's driven from JS.
+  // turn the cyclone marker: swap 36 pre-rotated copies every 50 ms (one turn per 1.8 s)
   const stopSpin = () => {
     if (spinTimer.current) clearInterval(spinTimer.current);
     spinTimer.current = null;
   };
-  const startSpin = (g: any) => {
+  const startSpin = (g: any, southern: boolean) => {
     stopSpin();
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const step = (g.geometry?.latitude ?? 0) < 0 ? -10 : 10; // SH clockwise, NH counter-clockwise
-    const base = JSON.stringify(g.symbol.data);
-    const frames: any[] = Array.from({ length: 36 }, (_, i) => {
-      const d = JSON.parse(base);
-      d.symbol.symbolLayers.slice(1).forEach((l: any) => (l.rotation = step * i)); // spiral layers, not the dot
-      return { type: "cim", data: d };
-    });
+    const frames: any[] = spinFrames(g.symbol, southern);
     let k = 0;
     spinTimer.current = window.setInterval(() => {
       g.symbol = frames[k];
@@ -1021,32 +989,6 @@ function Events() {
     }, 50);
   };
   useEffect(() => stopSpin, []); // stop on unmount
-
-  // symbols for geopulse_episodes points (layer 1) and lines (layer 2)
-  const trackSymbol = (a: any, geom?: any): any => {
-    // same RGB as the event markers (eventColor)
-    const typeColors: Record<string, number[]> = {
-      EQ: [101, 141, 27], TC: [218, 41, 28], DR: [128, 49, 167],
-      FL: [0, 176, 185], VO: [242, 169, 0], WF: [255, 130, 0],
-    };
-    const typeColor = typeColors[a.eventtype] ?? [217, 217, 217];
-    switch (a.role) {
-      case "track_line":
-        return { type: "simple-line", color: [255, 255, 255, 0.8], width: 1.5 };
-      case "track_point":
-        return a.forecast == 1
-          ? // forecast positions: hollow rings
-            { type: "simple-marker", size: 6, color: [0, 0, 0, 0], outline: { color: [255, 255, 255, 0.9], width: 1.2 } }
-          : // past positions: small solid dots
-            { type: "simple-marker", size: 4, color: [255, 255, 255, 0.9], outline: null };
-      case "track_current":
-        return a.eventtype === "TC"
-          ? cycloneSymbol(typeColor, (geom?.latitude ?? geom?.y ?? 0) < 0)
-          : { type: "simple-marker", size: 11, color: typeColor, outline: { color: "white", width: 1.5 } };
-      default: // epicentre
-        return { type: "simple-marker", size: 10, color: typeColor, outline: { color: "white", width: 2 } };
-    }
-  };
 
   const applyPolygon = (features: any) => {
     console.log("sS: ", features);
@@ -1061,6 +1003,20 @@ function Events() {
       weightedEventLayer.current.graphics.removeAll();
 
       function polygonStyle(value: any) {
+        // TC uncertainty cone and volcanic ash: striped grey, under the hazard bands
+        if (HATCHED_ROLES.has(value.attributes.role)) {
+          const g = value.clone();
+          g.symbol = hatchedArea();
+          unweightedEventLayer.current?.graphics.add(g, 0);
+          return;
+        }
+        // earthquake: weak-shaking MMI contours outside the purple area are striped, red contour line kept
+        if (value.attributes.eventtype === "EQ" && value.attributes.weight == 0) {
+          const g = value.clone();
+          g.symbol = hatchedArea([255, 0, 0, 80], 1.5);
+          weightedEventLayer.current?.graphics.add(g);
+          return;
+        }
         var outlineColor: string = "";
         var color: string = "";
         var style: string = "";
@@ -1102,20 +1058,26 @@ function Events() {
         // }
       });
 
-      // track line and points of the same episode
+      // track, markers and date labels of the same episode
       trackLayer.current?.graphics.removeAll();
       stopSpin();
-      const episode = features[0]?.attributes?.episodeid;
-      const order = (a: any) =>
-        a.role === "track_line" ? 0 : a.role === "track_point" ? 1 : 2; // current/epicentre on top
-      [...(trackByEpisode.current[episode] ?? [])]
+      const extras = trackByEpisode.current[features[0]?.attributes?.episodeid] ?? [];
+      const add = (f: any, symbol: any) => {
+        const g = f.clone();
+        g.symbol = symbol;
+        trackLayer.current?.graphics.add(g);
+        return g;
+      };
+      const order = (a: any) => (a.role === "track_line" ? 0 : a.role === "track_point" ? 1 : 2); // markers on top
+      [...extras]
         .sort((a, b) => order(a.attributes) - order(b.attributes))
         .forEach((f: any) => {
-          const g = f.clone();
-          g.symbol = trackSymbol(f.attributes, f.geometry);
-          trackLayer.current?.graphics.add(g);
-          if (f.attributes.role === "track_current" && f.attributes.eventtype === "TC") startSpin(g);
+          const g = add(f, episodeSymbol(f.attributes, f.geometry));
+          if (f.attributes.role === "track_current") startSpin(g, f.geometry.latitude < 0);
         });
+      const { minor, main } = labelledPoints(extras);
+      minor.forEach((f: any) => add(f, dateLabelSymbol(f.attributes, false, 7)));
+      main.forEach((f: any) => add(f, dateLabelSymbol(f.attributes, true, f.attributes.role === "track_current" ? 16 : 12)));
 
       baseLayer.current.effect = "blur(6px) brightness(0.7) grayscale(0.8)"; // blur, darken, and greyscale map base layer
       exposureLayer.current.effect = "blur(6px) brightness(0.7) grayscale(0.8)"; // blur, darken, and greyscale map exposure layer
@@ -2433,8 +2395,101 @@ function Events() {
             );
           })()}
         </div>
+        {/* map key for the selected event: pops out from the right edge of the exposure legend.
+            Open by default for each event; closing it only applies to that event. */}
+        {keys &&
+          (() => {
+            const open = keyClosedFor !== focusedEvent?.eventid;
+            const rgb = (t: string) => `rgb(${TYPE_COLORS[t].join(",")})`;
+            const stripes = "repeating-linear-gradient(-45deg, rgba(200,200,200,0.6) 0 1px, transparent 1px 4px)";
+            const hatch = (
+              <span className="size-3.5 rounded-[2px] border border-[#D2D2D2]/70" style={{ background: stripes }} />
+            );
+            const labels = HAZARD_LABELS[keys.type] ?? { area: "Hazard area" };
+            const displayOnly = <span className="text-[#8E8E93]"> · display only</span>;
+            return (
+              <div className="invisible absolute bottom-2 left-[358px] z-3 flex items-end md:visible">
+                <div
+                  inert={!open}
+                  className={`overflow-hidden transition-[max-width,opacity] duration-300 ease-out ${open ? "max-w-[240px] opacity-100" : "max-w-0 opacity-0"}`}
+                >
+                  <div className="ml-2 w-[230px] rounded-lg border border-[#2A3B5F] bg-[#1B1B1D] p-3.5 text-left text-white shadow-lg">
+                    <h3 className="text-[12px] font-bold uppercase leading-tight tracking-wide">
+                      {eventTypes[keys.type]?.singularType || "Selected event"}
+                    </h3>
+                    <ul className="mt-2 space-y-1.5">
+                      {keys.cyclone && (
+                        <KeyRow label="Cyclone position">
+                          <svg viewBox="-13 -13 26 26" className="size-5" aria-hidden>
+                            <path d={LEGEND_PATHS.cyclone} fill="#1E1E1E" stroke="white" strokeWidth="2" paintOrder="stroke" />
+                            <circle r="3" fill={rgb("TC")} stroke="white" strokeWidth="0.75" />
+                          </svg>
+                        </KeyRow>
+                      )}
+                      {keys.track && (
+                        <KeyRow label="Past / forecast track">
+                          <svg viewBox="0 0 20 8" className="h-2 w-5" aria-hidden>
+                            <line x1="3" y1="4" x2="16" y2="4" stroke="white" strokeOpacity="0.8" strokeWidth="1.2" />
+                            <circle cx="3" cy="4" r="1.6" fill="white" />
+                            <circle cx="16" cy="4" r="2.4" fill="#1B1B1D" stroke="white" strokeWidth="1" />
+                          </svg>
+                        </KeyRow>
+                      )}
+                      {keys.cone && <KeyRow label="Forecast uncertainty cone">{hatch}</KeyRow>}
+                      {keys.ash && <KeyRow label="Observed ash cloud">{hatch}</KeyRow>}
+                      {keys.epicentre && (
+                        <KeyRow label="Epicentre">
+                          <svg viewBox="-11 -11 22 22" className="size-4" aria-hidden>
+                            <path d={LEGEND_PATHS.quake} fill={rgb("EQ")} stroke="white" strokeWidth="1.5" />
+                          </svg>
+                        </KeyRow>
+                      )}
+                      {keys.volcano && (
+                        <KeyRow label="Volcano">
+                          <svg viewBox="-11 -11 22 22" className="size-4" aria-hidden>
+                            <path d={LEGEND_PATHS.volcano} fill={rgb("VO")} stroke="white" strokeWidth="1.5" />
+                          </svg>
+                        </KeyRow>
+                      )}
+                      {keys.hazard && (
+                        <KeyRow label={labels.area}>
+                          <span className="size-3.5 rounded-[2px] border-2 border-[#7E0063] bg-[rgb(62,28,52)]" />
+                        </KeyRow>
+                      )}
+                      {keys.bands && (
+                        <KeyRow label={<>{labels.bands ?? "Outer hazard bands"}{displayOnly}</>}>
+                          {/* earthquake contours are striped with the red contour line, as on the map */}
+                          <span
+                            className="size-3.5 rounded-[2px] border-2 border-[#FF000080]"
+                            style={keys.type === "EQ" ? { background: stripes } : undefined}
+                          />
+                        </KeyRow>
+                      )}
+                    </ul>
+                    <p className="mt-3 border-t border-white/10 pt-2 text-[11px] leading-snug text-[#A1A1A6]">
+                      The purple area is used to calculate exposure.
+                    </p>
+                    <p className="mt-1 text-[10px] text-[#A1A1A6]">Source: GDACS, IMF staff calculations.</p>
+                  </div>
+                </div>
+                {/* tab: sits on the legend's edge when closed, moves out with the panel */}
+                <button
+                  type="button"
+                  onClick={() => setKeyClosedFor(open ? focusedEvent.eventid : null)}
+                  aria-expanded={open}
+                  aria-label={open ? "Hide map key" : "Show map key"}
+                  className="mb-3 flex h-16 w-6 flex-col items-center justify-center gap-1 rounded-r-md border border-l-0 border-[#2A3B5F] bg-[#1B1B1D] text-white hover:bg-[#2A2A2E]"
+                >
+                  <span className="rotate-180 text-[10px] font-bold uppercase tracking-wide [writing-mode:vertical-rl]">
+                    Key
+                  </span>
+                  <span className="text-[10px]">{open ? "‹" : "›"}</span>
+                </button>
+              </div>
+            );
+          })()}
         <arcgis-scale-bar
-          className="calcite-mode-dark z-2 absolute top-30 right-5 md:top-auto md:right-auto md:bottom-[22px] md:left-[370px] max-w-21"
+          className="calcite-mode-dark z-2 absolute top-30 right-5 md:top-auto md:right-auto md:bottom-[22px] md:left-[392px] max-w-21"
           ref={scaleBarRef}
           bar-style="line"
           unit="metric"
