@@ -124,7 +124,7 @@ function RouteComponent() {
           <button
             key={id}
             onClick={() => jumpTo(id)}
-            className="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-full border border-[#C9D6EA] bg-white px-4 text-[14px] font-bold text-[#234E90] transition-all hover:-translate-y-0.5 hover:border-[#234E90] hover:shadow-[0_4px_12px_rgba(16,24,40,0.10)]"
+            className="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-full bg-(--fundblue) px-4 text-[14px] font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-(--fundblue)/90 hover:shadow-[0_4px_12px_rgba(16,24,40,0.18)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--fundblue)"
           >
             {label}
             <ArrowDown className="size-4" strokeWidth={2} />
