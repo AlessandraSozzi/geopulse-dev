@@ -28,4 +28,5 @@ package-lock.json
 .husky
 
 # local session change logs
-docs/session-changes-*.md
+docs/*.md
+docs/*.docx
