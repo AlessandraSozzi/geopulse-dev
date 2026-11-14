@@ -8,9 +8,9 @@ import { ArrowRight } from "../assets/arrow-right";
 // import { ChevronRight } from '../assets/chevron-right'
 import { TopoBackground } from "../components/TopoBackground";
 import globeExtrusions from "../assets/globeExtrusions high.webp";
-import trackPreview from "../assets/trackPreview.png";
-import seePreview from "../assets/seePreview.jpg";
-import estimatePreview from "../assets/estimatePreview.jpg";
+import trackPreview from "../assets/home-event-tracking.webp";
+import seePreview from "../assets/home-forward-looking.webp";
+import estimatePreview from "../assets/home-data-foundation.webp";
 import exportable from "../assets/exportable.svg";
 import downloadable from "../assets/downloadable.svg";
 import transparentMethodology from "../assets/transparentMethodology.svg";
@@ -199,6 +199,8 @@ const overviewCategories: {
   title: string;
   description: ReactElement;
   picture: string;
+  pictureAlt: string;
+  pictureSize: [number, number]; // intrinsic px, so the page reserves the space before the image loads
   order: string;
   link: string;
 }[] = [
@@ -221,6 +223,8 @@ const overviewCategories: {
       </div>
     ),
     picture: trackPreview,
+    pictureAlt: "Event details card for Tropical Cyclone ARNAB-26 over a population exposure map",
+    pictureSize: [1292, 1170],
     order: "normal",
     link: "/events",
   },
@@ -241,6 +245,8 @@ const overviewCategories: {
       </div>
     ),
     picture: seePreview,
+    pictureAlt: "Compare view: Bangladesh coastal flooding map by region and exposure trend chart",
+    pictureSize: [1293, 1175],
     order: "reverse",
     link: "/compare",
   },
@@ -262,6 +268,8 @@ const overviewCategories: {
       </div>
     ),
     picture: estimatePreview,
+    pictureAlt: "Grid view: temperature threshold slider and riverine flooding and GDP legend",
+    pictureSize: [1302, 1200],
     order: "normal",
     link: "/datamethodology",
   },
@@ -656,7 +664,15 @@ function RouteComponent() {
                 )}
               </div>
             </div>
-            <img className="pt-10 md:pt-0 md:w-5/10" src={e.picture}></img>
+            <img
+              className="pt-10 md:pt-0 md:w-5/10"
+              src={e.picture}
+              alt={e.pictureAlt}
+              width={e.pictureSize[0]}
+              height={e.pictureSize[1]}
+              loading="lazy"
+              decoding="async"
+            />
           </div>
         ))}
       </div>
